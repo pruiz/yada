@@ -128,7 +128,7 @@ static void yada_mysql_disconnect(yada_t *_yada)
 
 /******************************************************************************/
 
-static int yada_mysql__exec(yada_t *_yada, char *sqlstr, int sqlstr_len)
+static int yada_mysql__exec(yada_t *_yada, char *sqlstr, size_t sqlstr_len)
 {
   int rv;
 
@@ -160,7 +160,7 @@ static int yada_mysql__exec(yada_t *_yada, char *sqlstr, int sqlstr_len)
 
 /******************************************************************************/
 
-static yada_rc_t* yada_mysql__query(yada_t *_yada, char *sqlstr, int sqlstr_len)
+static yada_rc_t* yada_mysql__query(yada_t *_yada, char *sqlstr, size_t sqlstr_len)
 {
   int rv;
   yada_rc_t *_yrc;
@@ -327,7 +327,7 @@ int yada_mysql_fetch(yada_t *_yada, yada_rc_t *rrc, yada_rc_t *brc)
       break;
     case 'l':
       bindset->ele[i].var.l = atoll(rrow[di]);
-      *(long long **)bindset->ele[i].ptr = &(bindset->ele[i].var.l);
+      *(int64_t **)bindset->ele[i].ptr = &(bindset->ele[i].var.l);
       break;
     case 's':
     case 'e':

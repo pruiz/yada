@@ -61,12 +61,12 @@
 typedef struct
 {
   int i;
-  long long l;
+  int64_t l;
   char s[60];
   char e[60];
   char b[60];
   int blen;
-  int vnull;
+  size_t vnull;
   char v[60];
   double f;
 } insval_t;
@@ -75,7 +75,7 @@ typedef struct
 {
   int *id;
   int *i;
-  long long *l;
+  int64_t *l;
   char *s;
   char *e;
   char *b;
@@ -230,7 +230,7 @@ yada_t* ytest_init(char *type)
     {
     dbstr = "mysql:localhost::test";
     dbuser = "test";
-    dbpass = "";
+    dbpass = "test";
     create_table = mysql_create_table;
     }
   else if(spin() && !strcmp("oracle", type))
@@ -339,12 +339,18 @@ int ytest_prepare(yada_t *yada)
   test_start("native prepare / insert");
   spin();
 
+  printf("=> One..\n");
+
   if(!(stmt = yada->prepare(yada, SQL_PREP_INS, 0)))
     test_fail("failed to prepare statement: %s", yada->errmsg);
+
+  printf("=> Two..\n");
 
   for(i = 0; i < insval_rows; i++)
     {
     spin();
+
+  printf("=> FOR(%d)..\n", i);
  
     if(yada->execute(yada, stmt, i, insval[i].i, insval[i].l, insval[i].s,
      insval[i].e, insval[i].vnull, insval[i].v, insval[i].f) == -1)

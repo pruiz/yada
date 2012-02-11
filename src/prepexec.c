@@ -114,7 +114,7 @@ yada_prep_t* _prep_ele_new(void)
 
 yada_prep_t* _prep_ele_grow(yada_prep_t *yprep)
 {
-  int sz = yprep->sz + PREP_ELE_CHUNK_SZ;
+  size_t sz = yprep->sz + PREP_ELE_CHUNK_SZ;
   yada_prep_t *tmp_ptr;
 
 
@@ -156,10 +156,10 @@ void _yada_free_stmt(yada_t *_yada, yada_rc_t *_yrc)
  * shouldn't be called directly
  */
 
-static inline char* _fmtdup(yada_t* _yada, int *rlen, const char *fmt,
+static inline char* _fmtdup(yada_t* _yada, size_t *rlen, const char *fmt,
  va_list ap)
 {
-  int len;
+  size_t len;
   char *str;
 
 
@@ -273,7 +273,7 @@ static inline yada_rc_t* _yada_str_prepare(yada_t *_yada, char *sqlstr)
  */
 
 static inline yada_rc_t* _yada_len_prepare(yada_t *_yada, char *sqlstr,
-                                           int sqlstr_len)
+                                           size_t sqlstr_len)
 {
   char *buf, *bufp;
   yada_prep_t *yprep;
@@ -352,7 +352,7 @@ static inline yada_rc_t* _yada_len_prepare(yada_t *_yada, char *sqlstr,
 /** yada compat function to prepare an sql statement
  */
 
-yada_rc_t* _yada_prepare(yada_t *_yada, char *sqlstr, int sqlstr_len)
+yada_rc_t* _yada_prepare(yada_t *_yada, char *sqlstr, size_t sqlstr_len)
 {
   if(sqlstr_len)
     return(_yada_len_prepare(_yada, sqlstr, sqlstr_len));
@@ -366,11 +366,10 @@ yada_rc_t* _yada_prepare(yada_t *_yada, char *sqlstr, int sqlstr_len)
 
 yada_rc_t* _yada_preparef(yada_t *_yada, char *fmt, ...)
 {
-  int len;
+  size_t len;
   char *sqlstr;
   va_list ap;
   yada_rc_t *_yrc;
-
 
   va_start(ap, fmt);
   sqlstr = _fmtdup(_yada, &len, fmt, ap);
@@ -390,7 +389,7 @@ yada_rc_t* _yada_preparef(yada_t *_yada, char *fmt, ...)
 
 yada_rc_t* _yada_npreparef(yada_t *_yada, char *fmt, ...)
 {
-  int len;
+  size_t len;
   char *sqlstr;
   va_list ap;
   yada_rc_t *_yrc;
@@ -414,11 +413,10 @@ yada_rc_t* _yada_npreparef(yada_t *_yada, char *fmt, ...)
 
 yada_rc_t* _yada_xprepare(yada_t *_yada, int flags, char *fmt, ...)
 { 
-  int len;
+  size_t len;
   char *sqlstr;
   va_list ap;
   yada_rc_t *_yrc;
-
 
   va_start(ap, fmt);
 
@@ -449,7 +447,7 @@ yada_rc_t* _yada_xprepare(yada_t *_yada, int flags, char *fmt, ...)
  *  @return 0 on error, frees buf
  */
 
-static inline char* _yada_grow_buf(char *buf, int *sz, int len)
+static inline char* _yada_grow_buf(char *buf, size_t *sz, size_t len)
 {
   char *tmp_ptr;
 
@@ -472,8 +470,8 @@ static inline char* _yada_grow_buf(char *buf, int *sz, int len)
  * should not be called directly
  */
 
-static inline int _yada_ins_esc(yada_t *_yada, char **qstr, int *sz, int *len,
-                                char *arg, int arglen)
+static inline int _yada_ins_esc(yada_t *_yada, char **qstr, size_t *sz, size_t *len,
+                                char *arg, size_t arglen)
 {
   int dlen = (arglen <<1) + 1;
 
@@ -497,10 +495,10 @@ static inline int _yada_ins_esc(yada_t *_yada, char **qstr, int *sz, int *len,
  * should not be called directly
  */
 
-static inline int _yada_ins_var(yada_t *_yada, char **qstr, int *sz, int *len,
-                                char *arg, int arglen)
+static inline int _yada_ins_var(yada_t *_yada, char **qstr, size_t *sz, size_t *len,
+                                char *arg, size_t arglen)
 {
-  int dlen = (arglen <<1) + 3;
+  size_t dlen = (arglen <<1) + 3;
   char *str;
 
 
@@ -526,8 +524,8 @@ static inline int _yada_ins_var(yada_t *_yada, char **qstr, int *sz, int *len,
  *  should not be called directly
  */
 
-static inline int _yada_ins_double(yada_t *_yada, char **qstr, int *sz,
- int *len, double arg)
+static inline int _yada_ins_double(yada_t *_yada, char **qstr, size_t *sz,
+ size_t *len, double arg)
 {
   int dlen, alen;
 
@@ -549,10 +547,9 @@ static inline int _yada_ins_double(yada_t *_yada, char **qstr, int *sz,
 /******************************************************************************/
 
 inline char* _yada_parse_exec(yada_t *_yada, yada_prep_t *_ypr,
-                                     int *rlen, va_list ap)
+                                     size_t *rlen, va_list ap)
 {
-  int len = 0;
-  int i, arglen, nlen, sz;
+  size_t len = 0, i, arglen, nlen, sz;
   char *qstr, *bufp, *arg;
   prep_ele_t *elep, *elelen;
 
@@ -561,7 +558,7 @@ inline char* _yada_parse_exec(yada_t *_yada, yada_prep_t *_ypr,
   elelen = elep + _ypr->eles;
   sz = _ypr->len << 1;
 
-  if(!(qstr = malloc(sz)))
+  if(!(qstr = calloc(1, sz)))
     {
     _yada_set_yadaerr(_yada, YADA_ENOMEM);
     return(0);
@@ -652,11 +649,11 @@ inline char* _yada_parse_exec(yada_t *_yada, yada_prep_t *_ypr,
     case 'l':
       {
       int next;
-      long long l;
+      int64_t l;
       char dest[STRLEN_INT64];
       char *destp, *endp;
 
-      l = va_arg(ap, long long);
+      l = va_arg(ap, int64_t);
 
       /* always have at least 1 spare byte, no need to check overflow */
       if(l < 0)
@@ -736,11 +733,11 @@ inline char* _yada_parse_exec(yada_t *_yada, yada_prep_t *_ypr,
 
 int _yada_vexecute(yada_t *_yada, void *magic, va_list ap)
 {
-  int len, rv;
+  size_t len;
+  int rv;
   char *qstr;
   yada_rc_t *rc;
-
-
+  
   /* check for string */
   if(((yada_rc_t *)magic)->magic)
     {
@@ -780,9 +777,8 @@ int _yada_vexecute(yada_t *_yada, void *magic, va_list ap)
 
 int _yada_execute(yada_t *_yada, void *magic, ...)
 {
-  int rv;
+  size_t rv;
   va_list ap;
-
 
   va_start(ap, magic);
   rv = _yada_vexecute(_yada, magic, ap);
@@ -797,10 +793,10 @@ int _yada_execute(yada_t *_yada, void *magic, ...)
 
 int _yada_xexecute(yada_t *_yada, int flags, void *magic, ...)
 {
-  int len, rv;
+  size_t len;
+  int rv;
   char *qstr;
   va_list ap;
-
 
   va_start(ap, magic);
 
@@ -851,7 +847,7 @@ Err:
 
 yada_rc_t* _yada_vquery(yada_t *_yada, void *magic, va_list ap)
 {
-  int len;
+  size_t len;
   char *qstr;
   yada_rc_t *qrc;
   yada_rc_t *rc;
@@ -911,7 +907,7 @@ yada_rc_t* _yada_query(yada_t *_yada, void *magic, ...)
 
 yada_rc_t* _yada_xquery(yada_t *_yada, int flags, void *magic, ...)
 {
-  int len;
+  size_t len;
   char *qstr;
   va_list ap;
   yada_rc_t *qrc;
@@ -970,7 +966,7 @@ yada_rc_t* _yada_xquery(yada_t *_yada, int flags, void *magic, ...)
 /** return a string of prepared statement ready to be executed
  */
 
-char* _yada_dumpexec(yada_t *_yada, int *retlen, yada_rc_t *_yrc, ...)
+char* _yada_dumpexec(yada_t *_yada, size_t *retlen, yada_rc_t *_yrc, ...)
 {
   char *qstr;
   va_list ap;

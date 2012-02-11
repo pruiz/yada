@@ -58,8 +58,8 @@
 /** debug macros
  */
 
-#ifdef DEBUGMODE
-#  define DEBUGMSG(m...) { fprintf(stderr, m); fprintf(stderr, "\n"); }
+//#ifdef DEBUG
+#  define DEBUGMSG(m...) { fprintf(stdout, m); fprintf(stdout, "\n"); }
 #  ifdef DEBUGCOLOR
 #    define DBG_RED(a) "\033[01;31m" a "\033[00m"
 #    define DBG_GREEN(a) "\033[01;32m" a "\033[00m"
@@ -75,9 +75,9 @@
 #    define DBG_MAGENTA(a) a
 #    define DBG_CYAN(a) a
 #  endif
-#else
-#  define DEBUGMSG(...)
-#endif
+//#else
+//#  define DEBUGMSG(...)
+//#endif
 
 /******************************************************************************/
 /** macro to set arbitrary error info to the yada struct
@@ -108,7 +108,7 @@ struct yada_rc_t
 {
   char magic;
   unsigned int t;
-  unsigned int len;
+  size_t len;
   void *data;
   yada_rc_t *prev, *next;
 };
@@ -123,19 +123,19 @@ typedef struct
   /** pointer to the static string */
   char *buf;
   /** len of static string */
-  int len;
+  size_t len;
 } prep_ele_t;
 
 typedef struct
 {
   /** number of elements allocated */
-  int sz;
+  size_t sz;
   /** number of elements used */
-  int eles;
+  size_t eles;
   /** total length of all static strings */
-  int len;
+  size_t len;
   /** number of arguments */
-  int args;
+  size_t args;
   /** element array */
   prep_ele_t ele[1];
 } yada_prep_t;
@@ -157,7 +157,7 @@ typedef struct
   union
     {
     int i;
-    long long l;
+    int64_t l;
     unsigned char *buf;
     double f;
     } var;
@@ -166,9 +166,9 @@ typedef struct
 typedef struct
 {
   /** number of elements allocated */
-  int sz;
+  size_t sz;
   /** number of elements used */
-  int eles;
+  size_t eles;
   /** element array */
   bindset_ele_t ele[1];
 } yada_bindset_t;
@@ -182,16 +182,16 @@ typedef void (*yada_rc_free_t)(yada_t *, yada_rc_t *);
 struct yada_priv_t
 {
   void (*destroy)(yada_t *);
-  int (*exec)(yada_t *, char *, int);
-  yada_rc_t* (*query)(yada_t *, char *, int);
+  int (*exec)(yada_t *, char *, size_t);
+  yada_rc_t* (*query)(yada_t *, char *, size_t);
   unsigned int flags;
   lt_dlhandle dlh;
   yada_rc_t *rc_head;
   yada_rc_t *rc_tail;
   yada_rc_free_t free_rc[10];
   char errbuf[1024];
-  int (*execprep)(yada_t *, void *, int *, va_list);
-  yada_rc_t* (*queryprep)(yada_t *, void *, int *, va_list);
+  int (*execprep)(yada_t *, void *, size_t *, va_list);
+  yada_rc_t* (*queryprep)(yada_t *, void *, size_t *, va_list);
 };
 
 /******************************************************************************

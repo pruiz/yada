@@ -102,11 +102,12 @@ const char *_yada_errstrs[] = {
  *  outputs null terminated strings
  */
 
-char *_yada_escstr(char *src, int slen, char *dest, int *dlen)
+char *_yada_escstr(char *src, size_t slen, char *dest, size_t *dlen)
 {
-  int i, len;
+  size_t i, len;
   char *destp;
 
+  printf("====> _yada_escstr\n");
 
   if(!slen)
     slen = strlen(src);

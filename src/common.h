@@ -51,9 +51,9 @@
  * P R O T O T Y P E S ********************************************************
  ******************************************************************************/
 
-char *_yada_escstr(char *, int, char *, int *);
+char *_yada_escstr(char *, size_t, char *, size_t *);
 
-yada_rc_t* _yada_prepare(yada_t *, char *, int);
+yada_rc_t* _yada_prepare(yada_t *, char *, size_t);
 yada_rc_t* _yada_preparef(yada_t *, char *, ...);
 yada_rc_t* _yada_npreparef(yada_t *, char *, ...);
 yada_rc_t* _yada_xprepare(yada_t *, int, char *, ...);
@@ -66,7 +66,7 @@ yada_rc_t* _yada_vquery(yada_t *, void *, va_list);
 yada_rc_t* _yada_query(yada_t *, void *, ...);
 yada_rc_t* _yada_xquery(yada_t *, int, void *, ...);
 
-char* _yada_dumpexec(yada_t *, int *, yada_rc_t *, ...);
+char* _yada_dumpexec(yada_t *, size_t *, yada_rc_t *, ...);
 void _yada_free_stmt(yada_t *, yada_rc_t *);
 
 yada_rc_t* _yada_vbind(yada_t *, char *, va_list);
@@ -74,7 +74,7 @@ yada_rc_t* _yada_bind(yada_t *, char *, ...);
 
 void yada_free_bindset(yada_t *, yada_rc_t *);
 
-char* _yada_parse_exec(yada_t *_yada, yada_prep_t *_ypr, int *rlen, va_list ap);
+char* _yada_parse_exec(yada_t *_yada, yada_prep_t *_ypr, size_t *rlen, va_list ap);
 
 /******************************************************************************/
 
