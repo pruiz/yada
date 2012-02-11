@@ -1,0 +1,135 @@
+
+include "testruct.h";
+
+################################################################################
+# create test table
+
+yprepare create_table
+[
+  create table if not exists ?s (
+    id int unsigned not null auto_increment,
+    name varchar(31) not null,
+    var1 int not null,
+    var2 int,
+    flt decimal(9,2),
+    str1 varchar(15),
+    primary key (id),
+    unique key (name)
+  )
+]
+result status;
+
+################################################################################
+# destroy test table
+
+prepare drop_table
+[
+  drop table ttab
+]
+result status;
+
+################################################################################
+# insert row into test table
+
+prepare addrow
+[
+  insert into ttab (name, var1, flt, str1)
+  values ('?e', ?d, ?f, ?v)
+]
+result status;
+
+################################################################################
+# insert row into test table
+
+prepare addrowstruct
+  testruct_t (name, var1, flt, str1)
+[
+  insert into ttab (name, var1, flt, str1)
+  values ('?e', ?d, ?f, ?v)
+]
+result status;
+
+################################################################################
+# get id of named row
+
+prepare getid
+[
+  select id from ttab where name='?e'
+]
+result simple
+  ?d;
+
+################################################################################
+# get str1 from row by id
+
+prepare getstr
+[
+  select str1 from ttab where id=?d
+]
+result simple
+  ?ps;
+
+################################################################################
+# get str1 from row by id
+
+prepare getflt
+[
+  select flt from ttab where id=?d
+]
+result simple
+  ?f;
+
+################################################################################
+# fetch all info from row by id and var1
+ 
+prepare findrow
+[
+  select id, name, var1, flt, var2, str1
+  from ttab
+  where id=?d
+    and var1=?d
+]
+result single
+   ?d, ?s, ?d, ?f, ?pd, ?ps;
+
+################################################################################
+# fetch all info from row by id and var1
+
+prepare findstruct
+[
+  select id, name, var1, flt, var2, str1
+  from ttab
+  where id=?d
+    and var1=?d
+]
+result struct
+  testruct_t (&id, name, &var1, &flt, &var2, &str1)
+  ?d, ?s, ?d, ?f, ?pd, ?ps;
+
+################################################################################
+# fetch all matching rows by var1
+
+prepare findmatch
+[
+  select id, str1
+  from ttab
+  where var1=?d
+]
+result multirow
+  ?d, ?ps;
+
+################################################################################
+# fetch all matching rows by var1 to a struct
+
+prepare matchstruct
+[
+  select id, name, var1, var2, str1
+  from ttab
+  where var1=?d
+]
+result multistruct
+  testruct_t (&id, name, &var1, &var2, &str1)
+  ?d, ?s, ?d, ?pd, ?ps;
+
+################################################################################
+

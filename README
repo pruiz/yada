@@ -1,0 +1,36 @@
+
+yada - yet another database abstraction
+================================================================================
+
+Yada is a c library that abstracts SQL databases aiming at allowing transparent
+use of multiple databases.  The goal in mind is to make a common interface to
+multiple databases, thus stopping the need for application developers to write
+different modules for each SQL backend they want to support.  It's also useful
+for caching data in different database types, for example, accessing a remote
+Oracle database and caching results in a local MySQL one (the original proof of
+concept did so).
+
+To accomplish this, it uses a compatability layer of functions to bind input
+and output variables, prepare statements, and retreive data. Functionality and
+concept are somewhat like perl's DBI, and somewhat improved (I hope). In fact,
+I use it on projects where I have no need for multiple database support because
+I like the API.
+
+This API seems to work well, but I want to wait a bit longer before going to
+version 1.0 and locking it in to make sure there aren't any last minute changes
+or oversights.
+
+I know the documentation is sparse for now, I'm working on it ... please don't
+hesitate to email me with questions and I'll be happy to help.  That will also
+help me to know which parts need better documentation.
+
+See README.modules for module status.
+
+Please send any comments and bugs to yada@devit.com.
+
+Matt Griswold <matt@devit.com>
+6CF4 A97B 55A5 BBD6 FF06  6F0B F99D 7C86 6B2E 514F
+
+================================================================================
+
+

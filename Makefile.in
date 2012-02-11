@@ -1,0 +1,229 @@
+
+################################################################################
+################################################################################
+
+# Makefile
+# build system for yada
+#
+# $Id: Makefile.in 190 2007-11-21 00:07:23Z grizz $
+
+################################################################################
+## compiler stuff
+
+CC		= @CC@
+CFLAGS		+= @CFLAGS@
+LDFLAGS		= @LDFLAGS@
+LIBS		= @LIBS@
+
+################################################################################
+## utils
+
+CP		= cp
+RM		= rm -f
+CHMOD		= chmod
+MKDIR		= mkdir
+SED		= sed
+INSTALL		= @INSTALL@
+INSTALL_DATA	= @INSTALL_DATA@
+TAR		= tar
+GZIP		= gzip -c9
+BZIP		= bzip2 -c9
+
+################################################################################
+## build dirs
+
+VPATH		= @srcdir@
+srcdir		= src
+top_srcdir	= @top_srcdir@
+abs_srcdir	= @abs_srcdir@
+distdir		= @PACKAGE_TARNAME@-@PACKAGE_VERSION@
+
+################################################################################
+## install dirs
+
+prefix		= @prefix@
+exec_prefix	= @exec_prefix@
+sysconfdir	= @sysconfdir@
+bindir		= @bindir@
+sbindir		= @sbindir@
+libdir		= @libdir@
+libexecdir	= @libexecdir@
+datadir		= @datadir@
+datarootdir	= @datarootdir@
+mandir		= @mandir@
+man3dir		= $(mandir)/man3
+includedir	= @includedir@
+
+################################################################################
+## install
+
+isuexec		= 4755
+iinitexec	= 700
+iexec		= 755
+idata		= 644
+
+################################################################################
+## in-code options
+
+export LD_LIBRARY_PATH = $(abs_srcdir)/src/.libs
+
+################################################################################
+## files
+
+SUBDIRS		= src docs test libltdl yadac contrib
+EXTRA_DIST	= acinclude.m4 autogen.sh config.h.in Makefile.in aclocal.m4 \
+		  configure COPYING INSTALL README configure.ac ChangeLog \
+		  config.h.in install-sh config.guess config.sub ltmain.sh
+BUILD_EXTRA     = @BUILD_EXTRA@
+
+################################################################################
+## make
+
+.PHONY : all
+all :
+	@if test -n "$(BUILD_EXTRA)"; then \
+	  for each in $(BUILD_EXTRA); do \
+	    $(MAKE) -C $$each; \
+	  done \
+	fi;
+	$(MAKE) -C $(srcdir)
+	@echo done.
+
+.PHONY : clean
+clean :
+	$(MAKE) -C $(srcdir) clean
+	$(MAKE) -C test clean
+	$(MAKE) -C docs clean
+	@if test -n "$(BUILD_EXTRA)"; then \
+	  for each in $(BUILD_EXTRA); do \
+	    $(MAKE) -C $$each clean; \
+	  done \
+	fi;
+	-$(RM) -rf $(distdir) $(distdir).tar.gz $(distdir).tar.bz2
+	-$(RM) -rf $(distdir).tar.gz.asc $(distdir).tar.bz2.asc
+	-$(RM) -rf docs/doxygen.conf
+	-$(RM) -f .sqlite3_test
+	@echo done.
+
+.PHONY : distclean
+distclean :
+	@$(MAKE) clean
+	@$(MAKE) -C $(srcdir) distclean
+	@$(MAKE) -C test distclean
+	@$(MAKE) -C docs distclean
+	@if test -n "$(BUILD_EXTRA)"; then \
+	  for each in $(BUILD_EXTRA); do \
+	    $(MAKE) -C $$each distclean; \
+	  done \
+	fi;
+	-@$(MAKE) -C yadac distclean
+	-@$(MAKE) -C libltdl distclean
+	-$(RM) config.status config.log config.h Makefile
+	-$(RM) -rf contrib/yada.spec
+	-$(RM) -rf contrib/yada-*.ebuild
+	-$(RM) -rf libltdl/autom4te.cache
+	@echo done.
+
+.PHONY : maintainer-clean
+maintainer-clean :
+	-$(RM) aclocal.m4 configure
+	-$(RM) docs/doxygen.conf
+	@if test -n "$(BUILD_EXTRA)"; then \
+	  for each in $(BUILD_EXTRA); do \
+	    $(MAKE) -C $$each maintainer-clean; \
+	  done \
+	fi;
+	-@$(MAKE) -C yadac maintainer-clean
+	-@$(MAKE) -C libltdl maintainer-clean
+	@echo done.
+
+.PHONY : source 	 
+source :
+	$(MAKE) -C yadac source
+
+.PHONY : dist
+dist : dist-gzip dist-bzip2
+
+.PHONY : distsign
+distsign: dist
+	gpg -b --armor $(distdir).tar.gz
+	gpg -b --armor $(distdir).tar.bz2
+	md5sum $(distdir).tar.gz $(distdir).tar.bz2
+
+.PHONY : distdir
+distdir : source info html distclean
+	@$(RM) -r $(distdir)
+	@mkdir $(distdir)
+	-for each in $(SUBDIRS); do \
+	  cp -r $(top_srcdir)/$$each $(distdir); \
+	done
+	-for each in $(EXTRA_DIST); do \
+	  cp $(top_srcdir)/$$each $(distdir); \
+	done
+	find $(distdir) -type d -name .svn | xargs $(RM) -r
+
+.PHONY : dist-gzip
+dist-gzip : distdir 
+	$(TAR) -chof - $(distdir) | $(GZIP) > $(distdir).tar.gz
+
+.PHONY : dist-bzip2
+dist-bzip2 : distdir
+	$(TAR) -chof - $(distdir) | $(BZIP) > $(distdir).tar.bz2
+
+.PHONY : install
+install :
+	@if test -n "$(BUILD_EXTRA)"; then \
+	  for each in $(BUILD_EXTRA); do \
+	    $(MAKE) -C $$each install; \
+	  done \
+	fi;
+	$(MAKE) -C $(srcdir) install
+	@test -z "$(DESTDIR)$(man3dir)" || \
+	 $(INSTALL) -d -- "$(DESTDIR)$(man3dir)"
+	$(INSTALL) -m $(idata) docs/yada.3 docs/yada.trx.3 \
+	 "$(DESTDIR)$(man3dir)"
+
+################################################################################
+## docs
+
+.PHONY : docs
+docs :
+	$(MAKE) -C docs
+
+.PHONY : doxygen
+doxygen :
+	$(MAKE) -C docs doxygen
+
+.PHONY : info
+info : 
+	$(MAKE) -C docs info
+
+.PHONY : html
+html :
+	$(MAKE) -C docs html
+
+################################################################################
+## tests
+
+.PHONY : test
+test :
+	$(MAKE) -C test
+	$(top_srcdir)/test/yada_test
+
+.PHONY : valgrind
+valgrind :
+	make -C test yada_test
+	valgrind --tool=memcheck -v --leak-check=yes --num-callers=8 \
+	 --show-reachable=yes --leak-resolution=med test/yada_test
+
+.PHONY : purify
+purify :
+	make -C test pure_test
+	test/pure_test
+
+################################################################################
+## compile
+
+################################################################################
+################################################################################
+

@@ -1,0 +1,255 @@
+
+################################################################################
+################################################################################
+
+# Makefile
+# builds yada and modules
+#
+# $Id: Makefile.in 190 2007-11-21 00:07:23Z grizz $
+
+PACKAGE_VERSION = @PACKAGE_VERSION@
+
+################################################################################
+## compiler
+
+CC              = @CC@
+CPPFLAGS        = @DEFS@
+CFLAGS          = @CFLAGS@ $(INCLUDES)
+LDFLAGS         = @LDFLAGS@
+INCLUDES        = -I$(top_srcdir) -I$(srcdir) $(LTDLINCL)
+LIBS            = @LIBS@
+
+CCLD            = $(CC)
+LIBTOOL         = @LIBTOOL@
+LINK            = $(LIBTOOL) --mode=link $(CCLD) -version-info @LIB_VERSION@ $(CFLAGS) $(LDFLAGS) -o $@
+LTCOMPILE       = $(LIBTOOL) --mode=compile $(CC) $(CFLAGS) $(CPPFLAGS)
+LTDLINCL	= @LTDLINCL@
+LIBLTDL		= @LIBLTDL@
+
+################################################################################
+## utils
+
+CP              = cp
+LN_S            = @LN_S@
+MKDIR_P         = @MKDIR_P@
+INSTALL         = @INSTALL@
+RM              = rm -f
+SHELL           = @SHELL@
+@SET_MAKE@
+
+################################################################################
+## build dirs
+
+VPATH           = @srcdir@
+srcdir          = @srcdir@
+top_srcdir      = @top_srcdir@
+top_builddir    = @top_builddir@
+
+################################################################################
+## install dirs
+
+DESTDIR		=
+prefix          = @prefix@
+exec_prefix	= @exec_prefix@
+sysconfdir	= @sysconfdir@
+bindir		= @bindir@
+sbindir		= @sbindir@
+libdir		= @libdir@
+libexecdir	= @libexecdir@
+datadir		= @datadir@
+datarootdir	= @datarootdir@
+mandir		= @mandir@
+includedir	= @includedir@
+
+################################################################################
+## install
+
+iuser           = nobody
+igroup          = nogroup
+iexec           = 755
+idata           = 644
+
+################################################################################
+## conpile options
+
+ALL_CPPFLAGS = -DPACKAGE_VERSION=\"$(PACKAGE_VERSION)\" @DEFS@
+
+################################################################################
+## files
+
+LIBTOOL_DEPS          = @LIBTOOL_DEPS@
+YADA_BUILD_MODULES    = @YADA_BUILD_MODULES@
+
+headers               = _yada.h yada.h common.h
+allbin                = $(libyada_la)
+allobj                = $(libyada_OBJS) $(libyada_mysql_OBJS)
+all_la_obj            = $(libyada_la_OBJS) $(libyada_la_mysql_OBJS)
+#allbin                = $(libyada) $(libyada_mysql)
+
+compat_OBJS           = common.lo prepexec.lo
+
+################################################################################
+## libyada
+
+libyada_la            = libyada.la
+libyada_la_OBJS       = yada.lo $(compat_OBJS)
+libyada_la_CFLAGS     = $(LTDLINCL)
+libyada_la_LDFLAGS    =
+libyada_la_LIBADD     = $(LIBLTDL)
+
+################################################################################
+## libyada_mysql
+
+libyada_mysql_la         = libyada_mysql.la
+libyada_mysql_la_OBJS    = yada_mysql.lo $(compat_OBJS)
+libyada_mysql_la_CFLAGS  = @MYSQL_INCLUDE@
+libyada_mysql_la_LDFLAGS = $(LDFLAGS) @MYSQL_LDFLAGS@
+libyada_mysql_la_LIBADD  = @MYSQL_LIBS@
+
+################################################################################
+## libyada_oracle
+
+libyada_oracle_la         = libyada_oracle.la
+libyada_oracle_la_OBJS    = yada_oracle.lo $(compat_OBJS)
+libyada_oracle_la_CFLAGS  = @ORACLE_INCLUDE@ @ORACLE_CFLAGS@
+libyada_oracle_la_LDFLAGS = $(LDFLAGS) @ORACLE_LDFLAGS@
+libyada_oracle_la_LIBADD  = @ORACLE_LIBS@
+
+################################################################################
+## libyada_pgsql
+
+libyada_pgsql_la         = libyada_pgsql.la
+libyada_pgsql_la_OBJS    = yada_pgsql.lo $(compat_OBJS)
+libyada_pgsql_la_CFLAGS  = @PGSQL_INCLUDE@
+libyada_pgsql_la_LDFLAGS = $(LDFLAGS) @PGSQL_LDFLAGS@
+libyada_pgsql_la_LIBADD  = @PGSQL_LIBS@
+
+################################################################################
+## libyada_sqlite3
+
+libyada_sqlite3_la         = libyada_sqlite3.la
+libyada_sqlite3_la_OBJS    = yada_sqlite3.lo $(compat_OBJS)
+libyada_sqlite3_la_CFLAGS  = @SQLITE3_INCLUDE@
+libyada_sqlite3_la_LDFLAGS = $(LDFLAGS) @SQLITE3_LDFLAGS@
+libyada_sqlite3_la_LIBADD  = @SQLITE3_LIBS@
+
+################################################################################
+## make
+
+.PHONY : all
+all :
+	@echo building: $(YADA_BUILD_MODULES)
+	@echo $(allbin) | xargs $(MAKE)
+	@if test -n "$(YADA_BUILD_MODULES)"; then \
+	  for each in $(YADA_BUILD_MODULES); do \
+	    $(MAKE) libyada_$$each.la; \
+	  done \
+	fi;
+	@echo $(allbin) | xargs $(MAKE)
+	@echo "done."
+
+.PHONY : clean
+clean :
+	-$(RM) $(allbin) $(allobj) *.o
+	-$(RM) $(libyada_la_OBJS)
+	-$(RM) $(libyada_mysql_la) $(libyada_mysql_la_OBJS)
+	-$(RM) $(libyada_oracle_la) $(libyada_oracle_la_OBJS)
+	-$(RM) $(libyada_pgsql_la) $(libyada_pgsql_la_OBJS)
+	-$(RM) $(libyada_sqlite3_la) $(libyada_sqlite3_la_OBJS)
+	-$(RM) -r .libs _libs
+
+.PHONY : distclean
+distclean :
+	-$(RM) Makefile
+	@echo done.
+
+.PHONY : install
+install : all
+	test -z "$(DESTDIR)$(libdir)" || \
+	 $(INSTALL) -d -- "$(DESTDIR)$(libdir)"
+	@for each in $(allbin); do \
+	  trd="` echo $$each | sed -e 's|^.*/||' | sed '$(transform)' `"; \
+	  echo $$trd; \
+	  $(LIBTOOL) --mode=install $(INSTALL) -m $(iexec) $$each \
+	    $(DESTDIR)$(libdir)/$$trd; \
+	done
+	@if test -n "$(YADA_BUILD_MODULES)"; then \
+	  for each in $(YADA_BUILD_MODULES); do \
+	    each=libyada_$$each.la; \
+	    trd="` echo $$each | sed -e 's|^.*/||' | sed '$(transform)' `"; \
+	    echo $$trd; \
+	    $(LIBTOOL) --mode=install $(INSTALL) -m $(iexec) $$each \
+	      $(DESTDIR)$(libdir)/$$trd; \
+	  done \
+	fi;
+	test -z "$(DESTDIR)$(includedir)" || \
+	 $(INSTALL) -d -- "$(DESTDIR)$(includedir)"
+	$(INSTALL) -m $(idata) yada.h $(DESTDIR)$(includedir)
+
+################################################################################
+## compile
+
+$(all_la_obj) : $(headers)
+
+libtool : $(LIBTOOL_DEPS)
+	$(SHELL) ./config.status --recheck
+
+$(libyada_la) : $(libyada_la_OBJS)
+	$(LINK) -export-dynamic -rpath $(libdir) $(libyada_la_LDFLAGS) \
+          $(libyada_la_LIBADD) $(LIBS) $(libyada_la_OBJS)
+
+$(libyada_mysql_la) : $(libyada_mysql_la_OBJS)
+	$(LINK) -module -rpath $(libdir) $(libyada_mysql_la_LDFLAGS) \
+          $(libyada_mysql_la_LIBADD) $(LIBS) $(libyada_mysql_la_OBJS)
+
+$(libyada_oracle_la) : $(libyada_oracle_la_OBJS)
+	$(LINK) -module -rpath $(libdir) $(libyada_oracle_la_LDFLAGS) \
+          $(libyada_oracle_la_LIBADD) $(LIBS) $(libyada_oracle_la_OBJS)
+
+$(libyada_pgsql_la) : $(libyada_pgsql_la_OBJS)
+	$(LINK) -module -rpath $(libdir) $(libyada_pgsql_la_LDFLAGS) \
+          $(libyada_pgsql_la_LIBADD) $(LIBS) $(libyada_pgsql_la_OBJS)
+
+$(libyada_sqlite3_la) : $(libyada_sqlite3_la_OBJS)
+	$(LINK) -module -rpath $(libdir) $(libyada_sqlite3_la_LDFLAGS) \
+          $(libyada_sqlite3_la_LIBADD) $(LIBS) $(libyada_sqlite3_la_OBJS)
+
+yada.lo : yada.c
+	$(LTCOMPILE) $(libyada_la_CFLAGS) -c -o $@ $<
+
+yada_mysql.lo : yada_mysql.c
+	$(LTCOMPILE) $(libyada_mysql_la_CFLAGS) -c -o $@ $<
+
+yada_oracle.lo : yada_oracle.c
+	$(LTCOMPILE) $(libyada_oracle_la_CFLAGS) -c -o $@ $<
+
+yada_pgsql.lo : yada_pgsql.c
+	$(LTCOMPILE) $(libyada_pgsql_la_CFLAGS) -c -o $@ $<
+
+yada_sqlite3.lo : yada_sqlite3.c
+	$(LTCOMPILE) $(libyada_sqlite3_la_CFLAGS) -c -o $@ $<
+
+
+%.lo : %.c
+	$(LTCOMPILE) -c -o $@ $<
+
+################################################################################
+
+$(libyada_mysql) : $(libyada_mysql_OBJS)
+	$(CC) $(libyada_mysql_LDFLAGS) -shared -W1,-soname,libyada.0 -o $@ -rdynamic -ldl -lmysqlclient $^
+
+$(libyada) : $(libyada_OBJS)
+	$(CC) $(LDFLAGS) -shared -W1,-soname,libyada.0 -o $@ -rdynamic -ldl $^
+
+test : test.o
+	$(CC) $(LDFLAGS) $^ -lyada -ldl -o $@
+
+yada_mysql.o : yada_mysql.c
+	$(CC) $(CFLAGS) $(ALL_CPPFLAGS) $(libyada_mysql_CFLAGS) -fPIC -o $@ -c $<
+
+%.o : %.c
+	$(CC) $(CFLAGS) $(ALL_CPPFLAGS) -fPIC -o $@ -c $<
+
+################################################################################
+################################################################################
+

@@ -1,0 +1,114 @@
+
+################################################################################
+################################################################################
+
+# Makefile
+# builds yada test utility
+#
+# $Id: Makefile.in 159 2007-05-10 17:56:02Z grizz $
+
+PACKAGE_VERSION = @PACKAGE_VERSION@
+
+################################################################################
+## compiler
+CC              = @CC@
+CPPFLAGS        = @DEFS@
+CFLAGS          = @CFLAGS@ -I$(top_srcdir) -I$(srcdir) -I$(top_srcdir)/src
+LDFLAGS         = @LDFLAGS@ -L$(top_srcdir)/src/.libs
+LIBS            = @LIBS@
+MKFILE          = Makefile
+
+CCLD            = $(CC)
+LIBTOOL         = @LIBTOOL@
+LINK            = $(LIBTOOL) --mode=link $(CCLD) $(CFLAGS) $(LDFLAGS) -o $@
+LTCOMPILE       = $(LIBTOOL) --mode=compile $(CC) $(CFLAGS) $(CPPFLAGS)
+
+################################################################################
+## utils
+CP              = cp
+LN_S            = @LN_S@
+MKDIR_P         = @MKDIR_P@
+INSTALL         = @INSTALL@
+RM              = rm -f
+SHELL           = @SHELL@
+
+################################################################################
+## build dirs
+VPATH           = @srcdir@
+srcdir          = @srcdir@
+top_srcdir      = @top_srcdir@
+top_builddir    = @top_builddir@
+
+################################################################################
+## install dirs
+DESTDIR		=
+prefix          = @prefix@
+exec_prefix	= @exec_prefix@
+sysconfdir	= @sysconfdir@
+bindir		= @bindir@
+sbindir		= @sbindir@
+libdir		= @libdir@
+libexecdir	= @libexecdir@
+datadir		= @datadir@
+datadir		= @datarootdir@
+mandir		= @mandir@
+includedir	= @includedir@
+
+################################################################################
+## install
+iuser           = nobody
+igroup          = nogroup
+iexec           = 755
+idata           = 644
+
+################################################################################
+## in-code options
+
+ALL_CPPFLAGS = -DPACKAGE_VERSION=\"$(PACKAGE_VERSION)\" @DEFS@
+
+################################################################################
+## files
+
+allbin                = yada_test
+allobj                = yada_test.o
+
+headers               = $(top_srcdir)/config.h $(top_srcdir)/src/yada.h
+
+################################################################################
+## make
+.PHONY : all
+all :
+	@echo $(allbin) | xargs $(MAKE)
+	@echo done.
+
+.PHONY : clean
+clean :
+	-$(RM) $(allbin) $(allobj)
+
+.PHONY : distclean
+distclean :
+	-$(RM) Makefile
+
+.PHONY : install
+install : all
+
+.PHONY : purify
+purify : pure_test
+
+################################################################################
+## compile
+
+$(allobj) : Makefile $(headers)
+
+yada_test : yada_test.o
+	$(CC) $(LDFLAGS) $< -lyada -ldl -o $@
+
+pure_test : yada_test.o
+	purify $(CC) $(LDFLAGS) $^ -lyada -ldl -o $@
+
+%.o : %.c
+	$(CC) $(CFLAGS) $(ALL_CPPFLAGS) -o $@ -c $<
+
+################################################################################
+################################################################################
+

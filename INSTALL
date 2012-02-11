@@ -1,0 +1,58 @@
+
+yada build instructions
+================================================================================
+
+./configure with options you want
+
+Some notable ones are:
+
+--enable-debug
+Compiles with -g and enables debugging messages written to stderr.
+To just compile with -g, set the environment variable CFLAGS
+accordingly.
+
+--enable-ltdl-install
+Force the installation of the bundled libltdl
+
+
+Configuring for different database types
+================================================================================
+
+  --with-<db_type>[=DIR]
+  --with-<db_type>-incdir=DIR
+  --with-<db_type>-libdir=DIR
+
+There are a few options for defining the proper locations for database
+libraries. --with-<db_type> will search commong default locations, this is the
+default.  If you set --with-<db_type>=DIR it will look in DIR/include and
+DIR/lib for headers and libraries respectively.  To get more specific, you may
+use --with-<db_type>-incdir=DIR --with-<db_type>-libdir=DIR to set each of the
+directories where the files can be found.
+
+Currently supported database types:
+
+--with[out]-mysql
+
+--with[out]-oracle
+
+--with[out]-pgsql
+
+--with[out]-sqlite3
+
+When configure is done, to install simply:
+
+make
+make install
+
+
+Tested platforms
+================================================================================
+
+As of right now, yada requires gmake to build.  I've tested on
+gcc-x86-linux, gcc-x86-solaris, gcc-sparc-solaris, suncc-sparc-solaris,
+gcc-x86-freebsd, and it seems to work fine.  Please let me know
+<yada@devit.com> if you experience problems with any builds, or if it
+works on anything else.
+
+================================================================================
+

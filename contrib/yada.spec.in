@@ -1,0 +1,126 @@
+
+################################################################################
+################################################################################
+
+Summary: Yet Another Database Abstraction
+Name: yada
+Version: @PACKAGE_VERSION@
+Release: 0
+License: GPL
+URL: http://oss.devit.com/yada/
+Group: Development/Libraries
+Source: http://oss.devit.com/yada/yada-%{version}.tar.bz2
+Prereq: /sbin/install-info grep
+BuildRoot: %{_tmppath}/%{name}-%{version}-root
+BuildRequires: mysql-devel
+BuildRequires: oracle-instantclient-devel >= 10.2.0.3
+BuildRequires: postgresql-devel
+BuildRequires: sqlite-devel
+BuildRequires: doxygen, texinfo
+Requires: libtool-ltdl
+
+################################################################################
+
+%description
+Yada is a C library that abstracts SQL databases aiming at
+allowing transparent use of multiple databases. The goal in mind
+is to make a common interface to multiple databases, thus
+stopping the need for application developers to write different
+modules for each SQL backend they want to support.
+
+################################################################################
+
+%package devel
+Summary: Development files for yada
+Group: Development/Libraries
+%description devel
+Development headers, man pages and a query compiler for yada.
+
+%package mysql
+Summary: MySQL driver for yada
+Group: Development/Libraries
+%description mysql
+MySQL driver for yada, Yet Another Databse Abstraction.
+
+%package oracle
+Summary: Oracle driver for yada
+Group: Development/Libraries
+%description oracle
+MySQL driver for yada, Yet Another Databse Abstraction.
+
+%package pgsql
+Summary: PostgreSQL driver for yada
+Group: Development/Libraries
+%description pgsql
+PostgreSQL driver for yada, Yet Another Databse Abstraction.
+
+%package sqlite
+Summary: SQLite driver for yada
+Group: Development/Libraries
+%description sqlite
+SQLite driver for yada, Yet Another Databse Abstraction.
+
+################################################################################
+
+%prep
+%setup -q
+
+################################################################################
+
+%build
+%configure \
+;
+  
+make
+
+################################################################################
+
+%install
+rm -rf "$RPM_BUILD_ROOT"
+make install \
+  DESTDIR="$RPM_BUILD_ROOT"
+
+################################################################################
+
+%clean
+rm -rf $RPM_BUILD_ROOT
+
+################################################################################
+
+%files
+%defattr(-,root,root)
+%doc COPYING README
+%{_libdir}/libyada.*
+
+%files devel
+%doc docs/yada.html
+%{_bindir}/*
+%{_mandir}/
+%{_includedir}/yada.h
+
+%files mysql
+%{_libdir}/libyada_mysql*
+
+%files oracle
+%{_libdir}/libyada_oracle*
+
+%files pgsql
+%{_libdir}/libyada_pgsql*
+
+%files sqlite
+%{_libdir}/libyada_sqlite*
+
+################################################################################
+
+%changelog
+* Fri May 11 2007 Matt Griswold <matt@devIT.com> - 0.9.3
+- remove oracle configure lines
+* Tue May  8 2007 Matt Griswold <matt@devIT.com> - 0.9.3
+- remove patch
+- make source use %version
+* Fri Feb  5 2007 Mike Pomraning <mike.pomraning@tdstelecom.com> - 0.9.3
+- first packaging
+
+################################################################################
+################################################################################
+

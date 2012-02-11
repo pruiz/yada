@@ -1,0 +1,822 @@
+\input texinfo
+
+@c $Id$
+
+@c %**start of header
+@setfilename yada.info
+@include version.texi
+@settitle yada @value{PACKAGE_VERSION}
+@syncodeindex fn cp
+@syncodeindex tp cp
+@c %**end of header
+
+@copying
+
+Copyright @copyright{} 2004,2005 dev/IT
+
+@quotation
+Permission is granted to copy, distribute and/or modify this document
+under the terms of the GNU Free Documentation License, Version 1.2
+or any later version published by the Free Software Foundation;
+with no Invariant Sections, no Front-Cover Texts, and no Back-Cover
+Texts.  A copy of the license is included in the section entitled @cite{GNU
+Free Documentation License}.
+@end quotation
+@end copying
+
+@titlepage
+@title yada
+@subtitle yet another database abstraction
+@subtitle for version @value{PACKAGE_VERSION}
+
+@author Matt Griswold (@email{matt@@devit.com})
+
+@page
+@vskip 0pt plus 1filll
+@insertcopying 
+@end titlepage
+
+@summarycontents
+@contents
+
+@ifnottex
+@node Top
+@top yada
+@end ifnottex
+
+This manual is for @abbr{yada, yet another database abstraction} version
+@value{PACKAGE_VERSION}.
+
+@menu
+* Introduction:: 
+* Installing::
+* API::
+* Module API::
+* Examples::
+* Index::
+@end menu
+
+@node Introduction
+@chapter Introduction
+
+Yada is a c library that abstracts SQL databases aiming at allowing transparent
+use of multiple databases.  The goal in mind is to make a common interface to
+multiple databases, thus stopping the need for application developers to write
+different modules for each SQL backend they want to support.  It's also useful
+for caching data in different database types.
+
+To accomplish this, it uses a compatibility layer of functions to bind input
+and output variables, prepare statements, and retrieve data. Functionality and
+concept are somewhat like perl's DBI, and hopefully somewhat improved.
+
+Currently there are modules for MySQL, Oracle, PostgreSQL, and SQLite3.  Most
+features work in most modules, but all don't work everywhere yet, so please see
+the file @file{README.modules} from the source distribution for details.
+
+@menu
+* Where to get::
+* Reporting bugs::
+* Contributing::
+@end menu
+
+@node Where to get
+@section Where to get
+The latest version of yada is always available via http from
+@uref{http://oss.devit.com/yada} or via ftp from
+@uref{ftp://ftp.devit.com/yada/}.
+
+@node Reporting bugs
+@section Reporting bugs
+We welcome bug reports and suggestions for any aspect of yada, please email
+them to @email{yada@@devit.com}.
+
+For bug reports, please include enough information for us to reproduce the
+problem.  Generally speaking, that means:
+
+@itemize @bullet
+@item the version number of yada and any other programs involved.
+@item hardware and operating system names and versions.
+@item the schema for any tables necessary to reproduce the bug.
+@item a description of the problem and samples of any erroneous output.
+@item any unusual options you gave to @command{configure}.
+@item anything else that you think would be helpful.
+@end itemize
+
+When in doubt whether something is needed or not, include it.  It's
+better to include too much than to leave out something important.
+
+@node Contributing
+@section Contributing
+Patches are most welcome; if possible, please make them with
+@samp{@w{diff -c}} and include @file{ChangeLog} entries.
+
+When sending patches, if possible please do not encode or split them in
+any way; it's much easier to deal with one plain text message, however
+large, than many small ones.
+
+@node Installing
+@chapter Installing
+To use the default options, simply type
+
+@command{./configure}
+
+@command{make}
+
+@command{make install}
+
+@section configuring
+
+@command{configure} with options you want
+
+Some notable ones are:
+
+@table @option
+@item --enable-debug
+Compiles with -g and enables debugging messages written to stderr.
+To just compile with -g, set the environment variable @env{CFLAGS}
+accordingly.
+
+@item --enable-ltdl-install
+Force the installation of the bundled libltdl
+@end table
+
+Currently supported database types:
+@table @option
+@item --with[out]-mysql
+MySQL
+@item --with[out]-oracle
+Oracle
+@item --with[out]-pgsql
+PostgreSQL
+@item --with[out]-sqlite3
+SQLite 3
+@end table
+
+@section Configuring for different database types
+
+@table @option
+@item --with-@var{db_type}[=@file{DIR}]
+Look under @file{DIR} for includes and libs
+@item --with-@var{db_type}-incdir=@file{DIR}
+Look in @file{DIR} for includes
+@item --with-@var{db_type}-libdir=@file{DIR}
+Look in @file{DIR} for libs
+@end table
+
+
+There are a few options for defining the proper locations for database
+libraries. @option{--with-@var{db_type}}, the default, will search common
+installation locations.  If you set @option{--with-@var{db_type}=}@file{DIR} it
+will look in @file{DIR/include} and @file{DIR/lib} for headers and libraries
+respectively.  To get more specific, you may use
+@option{--with-@var{db_type}-incdir=}@file{DIR}
+@option{--with-@var{db_type}-libdir=}@file{DIR} to set each of the directories
+where the files can be found.
+
+When configure is done, to install simply:
+
+@command{make}
+
+@command{make install}
+
+
+@node API
+@chapter API
+
+To use yada, you must first initialize the library with
+@code{@ref{yada_init}}() which will return a pointer to a yada
+object.  The object may then be used to call the other functions as pointers
+from the base obj (i.e., @code{yada->@ref{connect}()}).  
+
+If at any time a yada function returns an error, error code may be checked at
+@code{yada->@ref{error}} and error message at @code{yada->@ref{errmsg}},
+except for @ref{yada_init,,@code{yada_init()}}, in which case error will be stored in errno.
+
+@menu
+* Control functions::
+* Statement preparation::
+* Statement execution::
+* Result retrieval::
+* Transactions::
+* Variables::
+* Resource types::
+* Token types::
+@end menu
+
+@node Control functions
+@section Control functions
+
+@menu
+* yada_init::
+* connect::
+* disconnect::
+* destroy::
+* free::
+* freeall::
+@end menu
+
+@findex yada_init
+@node yada_init
+@unnumberedsubsec @code{yada_t* yada_init(char *dbstr, unsigned int flags)}
+
+@table @var
+@item @sc{Parameters}
+@item dbstr
+a string defining the yada database to initialize
+@item flags
+currently unused
+@end table
+
+@table @var
+@item @sc{Returns}
+@item on success
+yada struct pointer
+@item on failure
+NULL
+@end table
+
+Initializes the yada library and returns a pointer to a yada object of the
+database type specified in @code{db_str}, a string made up of @var{database
+type}:[@var{type specific connection options}].  Once this is done, the other
+functions may be called from this base obj (i.e., @code{yada->connect()}).
+
+@findex connect
+@node connect
+@unnumberedsubsec @code{int connect(yada_t *yada, char *user, char *pass)}
+
+@table @var
+@item @sc{Parameters}
+@item user
+username for database connection, if needed
+@item pass
+password for database connection, if needed
+@end table
+
+@table @var
+@item @sc{Returns}
+@item on success
+non-zero
+@item on failure
+0
+@end table
+
+Attempts to connect to the database defined in the @code{db_str} passed to
+@code{yada_init()}, using user and pass if needed by the database type being
+connected to.
+
+@findex disconnect
+@node disconnect
+@unnumberedsubsec @code{void disconnect(yada_t *yada)}
+
+Disconnect from the database.
+
+@findex destroy
+@node destroy
+@unnumberedsubsec @code{void destroy(yada_t* yada)}
+Closes the database connection, frees all memory used by yada,
+and therefore invalidates the yada struct.
+
+@findex free
+@node free
+@unnumberedsubsec @code{void free(yada_t *yada, yada_rc_t *yada_rc)}
+
+@table @var
+@item @sc{Parameters}
+@item yada_rc
+pointer to the yada resource to free
+@end table
+
+Frees the resource pointed to by @var{yada_rc}.
+
+@findex freeall
+@node freeall
+@unnumberedsubsec @code{void freeall(yada_t *yada, int type)}
+
+@table @var
+@item @sc{Parameters}
+@item type
+OR-able set of @ref{Resource types} or -1 for all
+@end table
+
+Frees all memory used by yada resources of type @var{type}, an OR-able
+set of @ref{Resource types}.  If type is -1, it will free all resources.
+
+@node Statement preparation
+@section Statement preparation
+These functions prepare a string for execution, allowing mapping of input
+variables to be passed to execute.  Preparing will be done either by native
+database prepares, or by yada prepare.
+
+Yada prepare is a bit less strict that most databases are, so it's possible to
+put a placeholder anywhere, including SQL commands or table names.
+
+@menu
+* prepare::
+* preparef::
+* yprepare::
+* ypreparef::
+* xprepare::
+@end menu
+
+@findex prepare
+@node prepare
+@unnumberedsubsec @code{yada_rc_t* prepare(yada_t *yada, char *str, int strlen)}
+
+@table @var
+@item @sc{Parameters}
+@item str
+statement to be prepared
+@item strlen
+length of the string, or 0 for a null terminated string
+@end table
+
+@table @var
+@item @sc{Returns}
+@item on success
+yada resource pointing to the prepared statement
+@item on failure
+NULL
+@end table
+
+Prepares a string for execution using the native database prepared statements
+if available, if not falls back to @ref{yprepare}().
+
+@findex preparef
+@node preparef
+@unnumberedsubsec @code{yada_rc_t* preparef(yada_t *yada, char *format, ...)}
+
+@table @var
+@item @sc{Parameters}
+@item format
+format of string to be prepared
+@item ...
+arguments to format
+@end table
+
+@table @var
+@item @sc{Returns}
+@item on success
+yada resource pointing to the prepared statement
+@item on failure
+NULL
+@end table
+
+Creates a string from @var{format} and it's arguments using standard printf
+tokens and then uses it to prepares a statement.  Uses the database's native
+prepared statements if available, if not falls back to @ref{ypreparef}().
+
+@findex yprepare
+@node yprepare
+@unnumberedsubsec @code{yada_rc_t* yprepare(yada_t *yada, char *str, int strlen)}
+
+@table @var
+@item @sc{Parameters}
+@item str
+statement to be prepared
+@item strlen
+length of the string, or 0 for a null terminated string
+@end table
+
+@table @var
+@item @sc{Returns}
+@item on success
+yada resource pointing to the prepared statement
+@item on failure
+NULL
+@end table
+
+Prepares a string for execution using yada prepared statements.
+
+@findex ypreparef
+@node ypreparef
+@unnumberedsubsec @code{yada_rc_t* ypreparef(yada_t *yada, char *format, ...)}
+
+@table @var
+@item @sc{Parameters}
+@item format
+format of string to be prepared
+@item ...
+arguments to format
+@end table
+
+@table @var
+@item @sc{Returns}
+@item on success
+yada resource pointing to the prepared statement
+@item on failure
+NULL
+@end table
+
+Creates a string from @var{format} and it's arguments using standard printf
+tokens and then uses it to prepares a statement.  Uses the yada prepared
+statements.
+
+@findex xprepare
+@node xprepare
+@unnumberedsubsec @code{yada_rc_t* xprepare(yada_t *yada, int flags, char *str, ...)}
+
+@table @var
+@item @sc{Parameters}
+@item flags
+prepare options
+@item str
+statement to be prepared
+@item ...
+arguments to prepare
+@end table
+
+@table @var
+@item @sc{Returns}
+@item on success
+yada resource pointing to the prepared statement
+@item on failure
+NULL
+@end table
+
+Extensible prepare, uses @var{flags} options to decide how to prepare the
+statement.  This is for future use, as right now the only flag combinations can
+be done with the above 4 statements.
+
+@node Statement execution
+@section Statement execution
+
+@menu
+* execute::
+* query::
+* dumpexec::
+@end menu
+
+@findex execute
+@node execute
+@unnumberedsubsec @code{int execute(yada_t *yada, void *magic, ...)}
+
+@table @var
+@item @sc{Parameters}
+@item magic
+Statement to execute, either a statement string or a prepared @code{yada_rc*}
+@item ...
+if @var{magic} is a string, should be it's length or 0 for NULL terminated
+
+if @var{magic} is a prepared @code{yada_rc*}, placeholder variables should follow
+@end table
+
+@table @var
+@item @sc{Returns}
+@item on success
+number of rows affected
+@item on failure
+-1
+@end table
+
+Executes the statement, doesn't not return results so it shouldn't be used for
+select type statements;
+
+@findex query
+@node query
+@unnumberedsubsec @code{yada_rc_t* query(yada_t *yada, void *magic, ...)}
+
+@table @var
+@item @sc{Parameters}
+@item magic
+Statement to execute, either a statement string or a prepared resource(@code{yada_rc*})
+@item ...
+if @var{magic} is a string, should be it's length or 0 for NULL terminated
+
+if @var{magic} is a prepared resource, placeholder variables should follow
+@end table
+
+@table @var
+@item @sc{Returns}
+@item on success
+resource containing a result set
+@item on failure
+NULL
+@end table
+
+Executes the statement and returns a result set resource
+
+@findex dumpexec
+@node dumpexec
+@unnumberedsubsec @code{char* dumpexec(yada_t *yada, int *retlen,  yada_rc_t *prep, ...)}
+@strong{Note} only works with yprepared statements
+
+@table @var
+@item @sc{Parameters}
+@item retlen
+if not NULL, the length of the returned string will be put into it
+@item prep
+@item ...
+placeholder variables if needed for @var{prep}
+@end table
+
+@table @var
+@item @sc{Returns}
+@item on success
+string of the processed statement
+@item on failure
+NULL
+@end table
+
+Functions exactly the same as execute, only instead of executing the statement once it's compiled, it returns it as a string.
+
+@node Result retrieval
+@section Result retrieval
+
+@menu
+* bind::
+* fetch::
+@end menu
+
+@findex bind
+@node bind
+@unnumberedsubsec @code{yada_rc_t* bind(yada_t *yada, char *map, ...)}
+
+@table @var
+@item @sc{Parameters}
+@item map
+string containing a list of the variable types
+@item ...
+list of the variables to bind
+@end table
+
+@table @var
+@item @sc{Returns}
+@item on success
+resource containing a bind set
+@item on failure
+NULL
+@end table
+
+Makes a mapping of variables to results.  It expects pointers to actual storage
+space to put the variable into, or if the type is preceded by @samp{p},
+expects a pointer to a pointer which will be set to the retrieved data that
+will be stored internally.
+
+For example, to bind directly to an int and as a pointer to a string, you would do something like this:
+
+@example
+@code{brc = yada->bind(yada, "?d?ps", (int *)&i, (char **)&str);}
+@end example
+
+@xref{Token types}, for a list of the supported variables types.
+
+@xref{fetch-null-column,,fetch}, for information on how fetch treats these variables when a column is null, see
+
+@findex fetch
+@node fetch
+@unnumberedsubsec @code{int fetch(yada_t *yada, yada_rc_t *res, yada_rc_t *bindset)}
+
+@table @var
+@item @sc{Parameters}
+@item res
+result set resource
+@item bindset
+bind set resource
+@end table
+
+@table @var
+@item @sc{Returns}
+@item on success
+non zero
+@item on failure
+0
+@end table
+
+Retrieves the next row of results into the variables mapped by @var{bindset}.
+
+@anchor{fetch-null-column}
+If a column is NULL:
+@itemize
+@item binary length variables will be unset
+@item pointer variables will be set to NULL
+@item the first byte of strings will be set to NULL
+@end itemize
+
+
+@node Transactions
+@section Transactions
+
+@menu
+* trx::
+* commit::
+* rollback::
+@end menu
+
+@findex trx
+@node trx
+@unnumberedsubsec @code{int trx(yada_t* yada, int flags)}
+
+@table @var
+@item @sc{Parameters}
+@item flags
+unused
+@end table
+
+@table @var
+@item @sc{Returns}
+@item on success
+0
+@item on failure
+non-zero
+@end table
+
+Begins a transaction, flags (currently unused) will allow you to start
+different types of transactions.
+
+@findex commit
+@node commit
+@unnumberedsubsec @code{int commit(yada_t* yada)}
+
+@table @var
+@item @sc{Returns}
+@item on success
+0
+@item on failure
+non-zero
+@end table
+
+Commit the current transaction causing any changes made to be saved.
+
+@findex rollback
+@node rollback
+@unnumberedsubsec @code{int rollback(yada_t* yada, int flags)}
+
+@table @var
+@item @sc{Parameters}
+@item flags
+unused
+@end table
+
+@table @var
+@item @sc{Returns}
+@item on success
+0
+@item on failure
+non-zero
+@end table
+
+Rollback the current transaction undoing any transactional changes.
+
+@node Variables
+@section Variables
+
+Read only variables available on the yada struct.
+
+@menu
+* error::
+* errmsg::
+@end menu
+
+@findex error
+@node error
+@unnumberedsubsec @code{int error}
+Error code of the last error that occurred.
+
+@findex errmsg
+@node errmsg
+@unnumberedsubsec @code{char *errmsg}
+Error message for the last error that occurred.
+
+@node Resource types
+@section Resource types
+
+@table @dfn
+@tindex YADA_STATEMENT
+@item YADA_STATEMENT
+prepared statements returned from @code{prepare()}
+
+@tindex YADA_RESULT
+@item YADA_RESULT
+result sets returned from @code{query()}
+
+@tindex YADA_BINDSET
+@item YADA_BINDSET
+bind sets as returned from @code{bind()}
+@end table
+
+@node Token types
+@section Token types
+
+Yada tokens are used to define variable types in both @code{prepare()} and
+@code{bind()}.  Tokens are specified with a question mark (@samp{?}) followed
+by the letter for the type.  To specify the variable is a pointer, use a
+question mark followed by a @samp{p} and then followed by the type letter.
+Currently this is only used in @code{bind()}.
+
+Token types are as follows:
+
+@table @dfn
+@item a
+escaped binary string
+
+@item b
+binary string - a binary string is a pair of variables, a @code{char*} string,
+and an @code{unsigned long} length. Whenever you need to pass the string
+variable, you should pass the length variable next.  When used with
+@code{bind()} and an execute function is called, the len variable is always an
+@code{unsigned long} and never a pointer, even if the binary string is a
+pointer (@samp{?pb}).
+
+@item d
+32 bit integer, signed or unsigned
+
+@item e
+escaped string
+
+@item l
+64 bit integer, signed or unsigned
+
+@item s
+string - NULL terminated @code{char*}
+
+@item v
+variable - a variable is like an escaped string except yada will surround it with single quotes (@samp{'}) if it's set, or replace it with the with the string @samp{NULL} if null.
+
+       Escaped variables are the same as the variable, except any characters
+       needing escaping are escaped (this differs with the type of database it
+       is).
+@end table
+
+
+@node Module API
+@chapter Module API
+
+This is where the documentation and internal API description for making yada
+modules will go.  Until then, grab an already made module and start from there,
+the code is fairly well documented.
+
+@node Examples
+@chapter Examples
+
+Here is a simple example showing how to do a basic prepared insert, and bind to
+an output variable.  For more examples, see test/yada_test.c in the source
+distribution.
+
+@verbatim
+  int intcol;
+  yada_t *yada;
+  yada_rc_t *brc, *res, *stmt;
+
+
+  /* init and connect to yada */
+  if(!(yada = yada_init("mysql:localhost", 0))) {
+    errmsg("Failed to initialize yada: %s\n", strerror(errno));
+    return(1);
+  }
+
+  /* prepare insert statement */
+  if(!(stmt = yada->yprepare(yada, "insert into test (intcol) values (?d)", 0))) {
+    errmsg("Failed to prepare insert: %s\n", yada->errmsg);
+    yada->destroy(yada);
+    return(1);
+  }
+
+  /* bind column to intcol */
+  if(!(brc = yada->bind(yada, "?d", &intcol))) {
+  }
+
+  /* connect to database */
+  if(!yada->connect(yada, "scott", "tiger")) {
+    errmsg("Failed to connect: %s\n", yada->errmsg);
+    yada->destroy(yada);
+    return(1);
+  }
+
+  /* insert a row */
+  if(yada->execute(yada, stmt, 5) == -1) {
+    errmsg("Failed to insert: %s\n", yada->errmsg);
+    yada->destroy(yada);
+    return(1);
+  }
+
+  /* free prepared insert statement */
+  yada->free(stmt);
+
+  /* query all rows */
+  if(!(res = yada->query(yada, "select intcol from yada_test", 0))) {
+    errmsg("Failed to insert: %s\n", yada->errmsg);
+    yada->destroy(yada);
+    return(1);
+  }
+
+  /* fetch rows one at a time */
+  while(yada->fetch(yada, res, brc))
+    printf("intcol: %d\n", intcol);
+
+  /* check for error */
+  if(yada->error) {
+    errmsg("error fetching row: %s", yada->errmsg);
+    yada->destroy(yada);
+    return(1);
+  }
+
+  /* disconnect and free everything */
+  yada->destroy(yada);
+  return(0);
+@end verbatim
+
+@node Index
+@chapter Index
+@printindex cp
+
+

@@ -1,0 +1,159 @@
+.TH "yada" 3
+.SH NAME
+yada \- yet another database abstraction
+.SH SYNOPSIS
+.nf
+.B #include <yada.h>
+.sp
+.BI "yada_t* yada_init(char *" db_str ", unsigned int " flags ");"
+.sp
+.BI "int connect(yada_t *" yada ", char *" user ", char *" pass ");"
+.br
+.BI "void disconnect(yada_t *" yada ");"
+.br
+.BI "void destroy(yada_t *" yada ");"
+.sp
+.BI "yada_rc_t* prepare(yada_t *" yada ", char *" fmt ", int *" len ");"
+.br
+.BI "int execute(yada_t *" yada ", void *" magic ", ...);"
+.br
+.BI "yada_rc_t* query(yada_t *" yada ", void *" magic ", ...);"
+.br
+.BI "char* dumpexec(yada_t *" yada ", int *" retlen ",  yada_rc_t *" prep ", ...);"
+.sp
+.BI "yada_rc_t* bind(yada_t *" yada ", char *" fmt ", ...);"
+.br
+.BI "yada_rc_t* fetch(yada_t *" yada ", yada_rc_t *" res ", yada_rc_t *" bindset ");"
+.sp
+.BI "void free(yada_t *" yada ", yada_rc_t *" yada_rc ");"
+.br
+.BI "void freeall(yada_t *" yada ", int "type);"
+.sp
+.fi
+.SH DESCRIPTION
+Yada is a database abstraction library aimed at allowing transparent use of
+multiple databases.  To accomplish this, it uses a compatability layer of
+functions to bind input and output variables, prepare statements, and retreive
+data.
+.PP
+To use yada, you must first initialize the library with \fByada_init()\fP which
+will return a pointer to a yada object (\fIyada_t *\fP) of database type
+specified in \fIdb_str\fP.  The object may then be used to call the other
+functions as pointers from the base obj (i.e., \fByada->connect()\fP).
+.PP
+If at any time a yada function returns an error, error code may be checked at
+(int)\fI yada->error\fP and error message at (const char *)\fIyada->errmsg\fP,
+except for yada_init, in which case error will be stored in errno.
+.PP
+\fByada_init()\fP initializes the yada library and returns a pointer to a yada
+object of the database type specified in \fIdb_str\fP, a string made up of
+<database type>:[type specific connection options].   \Once this is done, you
+may call the other functions from this base obj (i.e., \fByada->connect()\fP).
+.PP
+\fBdestroy()\fP closes the database connection, frees all memory used by
+\fIyada\fP, and therefore invalidates the \fIyada\fP struct.
+.PP
+\fBconnect()\fP attempts to connect to the database defined in the \fIdb_str\fP
+passed to \fByada_init()\fP, using \fIuser\fP and  \fIpass\fP if used by
+the database type you're connecting to.  Returns 0 on failure, non 0 on
+success.
+.PP
+\fBprepare()\fP prepares a string for execution, allowing mapping of input
+variables to be passed to execute.
+.PP
+\fBexecute()\fP and \fBquery()\fP can both be used be multiple ways.  If
+\fImagic\fP is a string, the next argument should be the length of the string,
+or 0 for a NULL terminated one.  If \fImagic\fP is a prepared statement
+yada_rc, it expects the placeholder variables to follow.  On success,
+\fBquery()\fP returns a yada resource containing a result set and
+\fBexecute()\fP returns  the number of rows affected.  On failure,
+\fBquery()\fP returns NULL, and \fBexecute()\fP returns -1.
+.PP
+\fBdumpexec()\fP functions exactly the same as execute, only instead of
+executing the final statement, returns it as a string.  If not NULL, the length
+of the returned string is put into \fIretlen\fP.
+.PP
+\fBbind()\fP maps variables to results.  It expects pointers to actual storage
+space to put the variable into.  On null results, it sets the first byte of the
+string to 0.  If the type is preceeded by 'p' it expects a pointer to a pointer
+which it will set to retreived data.  On null, it sets the pointer to 0.
+.PP
+\fBfetch()\fP retrieves the next row of results into the variables bound by
+\fBbind()\fP.  Binary length variables will be unset if the field is NULL.
+.PP
+\fBfree()\fP frees the resource pointed to by \fIyada_rc\fP.
+.PP
+\fBfreeall()\fP frees all memory used by \fIyada\fP resources of type
+\fItype\fP.  If type is -1, it will free all resources, type maybe be an OR'd
+set of multiple types.
+.PP
+\fItype\fP may be any of the following:
+.TP
+.B YADA_STATEMENT
+prepared statements returned from \fBprepare()\fP
+.TP
+.B YADA_RESULT
+result sets returned from \fBquery()\fP
+.TP
+.B YADA_BINDSET
+bind sets as returned from \fBbind()\fP
+.PP
+Yada tokens are used to define variable types in both \fBprepare()\fP and
+\fBbind()\fP.  Tokens are specified with a question mark followed by the letter
+for the type.  To specify the variable is a pointer, use a question mark
+followed by a 'p' and then followed by the type letter.  Currently this is only
+used in bind().
+.PP
+token types are as follows:
+.TP
+.B a
+escaped
+.I
+binary string
+.TP
+.B b
+.I
+binary string
+- a binary string is a pair of variables, a char * string, and an
+unsigned long length.  Whenever you need to pass the string variable, you
+should pass the length variable next.  When used with \fBbind()\fP and an
+execute function is called, the len variable is always just an unsigned long
+and never a pointer, even if the binary string is a pointer (?pb).
+.TP
+.B d
+.I
+number
+32 bit, signed or unsigned
+.TP
+.B e
+escaped
+.I
+string
+.TP
+.B l
+.I
+number
+64 bit, signed or unsigned
+.TP
+.B s
+.I
+string
+- NULL terminated char *
+.TP
+.B v
+.I
+variable
+- a variable is like an escaped
+.I
+string
+except yada will surroung it with single quotes (') if it's set, or with the
+string NULL if null.
+.PP
+Escaped variables are the same as the variable, except any characters needing
+escaping are escaped (this differs with the type of database it is).
+.SH EXAMPLES
+Coming soon!  For now, the best place to check is test/yada_test.c
+.PP
+.SH "SEE ALSO"
+.BR yada.trx (3)
+

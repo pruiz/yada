@@ -1,0 +1,32 @@
+.TH "yada.trx" 3
+.SH NAME
+yada transaction functions
+.SH SYNOPSIS
+.nf
+.B #include <yada.h>
+.sp
+.BI "int yada.trx(yada_t *" yada_rc ", int " flags );
+.br
+.BI "void yada.commit(yada_t *" yada ");"
+.br
+.BI "void yada.rollback(yada_t *" yada ", int "flags );"
+.sp
+.fi
+.SH DESCRIPTION
+Yada is a database abstraction library aimed at allowing transparent use of
+multiple databases.  To accomplish this, it uses a compatability layer of
+functions to bind input and output variables, prepare statements, and retreive
+data.
+.PP
+These are the transaction handling functions for yada.
+.PP
+\fBtrx()\fP begins a transaction, flags (currently unused) will allow
+you to start different types of transactions.
+.PP
+\fBcommit()\fP commits a transaction causing any changes made to be saved.
+.PP
+\fBrollback()\fP rolls back the transaction undoing any transactional changes.
+.PP
+.SH "SEE ALSO"
+.BR yada (3)
+

@@ -1,0 +1,1081 @@
+<html lang="en">
+<head>
+<title>yada 0.11.0</title>
+<meta http-equiv="Content-Type" content="text/html">
+<meta name="description" content="yada 0.11.0">
+<meta name="generator" content="makeinfo 4.8">
+<link title="Top" rel="top" href="#Top">
+<link href="http://www.gnu.org/software/texinfo/" rel="generator-home" title="Texinfo Homepage">
+<!--
+Copyright (C) 2004,2005 dev/IT
+
+     Permission is granted to copy, distribute and/or modify this
+     document under the terms of the GNU Free Documentation License,
+     Version 1.2 or any later version published by the Free Software
+     Foundation; with no Invariant Sections, no Front-Cover Texts, and
+     no Back-Cover Texts.  A copy of the license is included in the
+     section entitled `GNU Free Documentation License'.
+   -->
+<meta http-equiv="Content-Style-Type" content="text/css">
+<style type="text/css"><!--
+  pre.display { font-family:inherit }
+  pre.format  { font-family:inherit }
+  pre.smalldisplay { font-family:inherit; font-size:smaller }
+  pre.smallformat  { font-family:inherit; font-size:smaller }
+  pre.smallexample { font-size:smaller }
+  pre.smalllisp    { font-size:smaller }
+  span.sc    { font-variant:small-caps }
+  span.roman { font-family:serif; font-weight:normal; } 
+  span.sansserif { font-family:sans-serif; font-weight:normal; } 
+--></style>
+</head>
+<body>
+<h1 class="settitle">yada 0.11.0</h1>
+<div class="shortcontents">
+<h2>Short Contents</h2>
+<ul>
+<li><a href="#toc_Top">yada</a></li>
+<li><a href="#toc_Introduction">1 Introduction</a></li>
+<li><a href="#toc_Installing">2 Installing</a></li>
+<li><a href="#toc_API">3 API</a></li>
+<li><a href="#toc_Module-API">4 Module API</a></li>
+<li><a href="#toc_Examples">5 Examples</a></li>
+<li><a href="#toc_Index">6 Index</a></li>
+</ul>
+</div>
+
+
+
+   <div class="contents">
+<h2>Table of Contents</h2>
+<ul>
+<li><a name="toc_Top" href="#Top">yada</a>
+<li><a name="toc_Introduction" href="#Introduction">1 Introduction</a>
+<ul>
+<li><a href="#Where-to-get">1.1 Where to get</a>
+<li><a href="#Reporting-bugs">1.2 Reporting bugs</a>
+<li><a href="#Contributing">1.3 Contributing</a>
+</li></ul>
+<li><a name="toc_Installing" href="#Installing">2 Installing</a>
+<ul>
+<li><a href="#Installing">2.1 configuring</a>
+<li><a href="#Installing">2.2 Configuring for different database types</a>
+</li></ul>
+<li><a name="toc_API" href="#API">3 API</a>
+<ul>
+<li><a href="#Control-functions">3.1 Control functions</a>
+<ul>
+<li><a href="#yada_005finit"><code>yada_t* yada_init(char *dbstr, unsigned int flags)</code></a>
+<li><a href="#connect"><code>int connect(yada_t *yada, char *user, char *pass)</code></a>
+<li><a href="#disconnect"><code>void disconnect(yada_t *yada)</code></a>
+<li><a href="#destroy"><code>void destroy(yada_t* yada)</code></a>
+<li><a href="#free"><code>void free(yada_t *yada, yada_rc_t *yada_rc)</code></a>
+<li><a href="#freeall"><code>void freeall(yada_t *yada, int type)</code></a>
+</li></ul>
+<li><a href="#Statement-preparation">3.2 Statement preparation</a>
+<ul>
+<li><a href="#prepare"><code>yada_rc_t* prepare(yada_t *yada, char *str, int strlen)</code></a>
+<li><a href="#preparef"><code>yada_rc_t* preparef(yada_t *yada, char *format, ...)</code></a>
+<li><a href="#yprepare"><code>yada_rc_t* yprepare(yada_t *yada, char *str, int strlen)</code></a>
+<li><a href="#ypreparef"><code>yada_rc_t* ypreparef(yada_t *yada, char *format, ...)</code></a>
+<li><a href="#xprepare"><code>yada_rc_t* xprepare(yada_t *yada, int flags, char *str, ...)</code></a>
+</li></ul>
+<li><a href="#Statement-execution">3.3 Statement execution</a>
+<ul>
+<li><a href="#execute"><code>int execute(yada_t *yada, void *magic, ...)</code></a>
+<li><a href="#query"><code>yada_rc_t* query(yada_t *yada, void *magic, ...)</code></a>
+<li><a href="#dumpexec"><code>char* dumpexec(yada_t *yada, int *retlen,  yada_rc_t *prep, ...)</code></a>
+</li></ul>
+<li><a href="#Result-retrieval">3.4 Result retrieval</a>
+<ul>
+<li><a href="#bind"><code>yada_rc_t* bind(yada_t *yada, char *map, ...)</code></a>
+<li><a href="#fetch"><code>int fetch(yada_t *yada, yada_rc_t *res, yada_rc_t *bindset)</code></a>
+</li></ul>
+<li><a href="#Transactions">3.5 Transactions</a>
+<ul>
+<li><a href="#trx"><code>int trx(yada_t* yada, int flags)</code></a>
+<li><a href="#commit"><code>int commit(yada_t* yada)</code></a>
+<li><a href="#rollback"><code>int rollback(yada_t* yada, int flags)</code></a>
+</li></ul>
+<li><a href="#Variables">3.6 Variables</a>
+<ul>
+<li><a href="#error"><code>int error</code></a>
+<li><a href="#errmsg"><code>char *errmsg</code></a>
+</li></ul>
+<li><a href="#Resource-types">3.7 Resource types</a>
+<li><a href="#Token-types">3.8 Token types</a>
+</li></ul>
+<li><a name="toc_Module-API" href="#Module-API">4 Module API</a>
+<li><a name="toc_Examples" href="#Examples">5 Examples</a>
+<li><a name="toc_Index" href="#Index">6 Index</a>
+</li></ul>
+</div>
+
+<div class="node">
+<p><hr>
+<a name="Top"></a>
+Up:&nbsp;<a rel="up" accesskey="u" href="#dir">(dir)</a>
+
+</div>
+
+<h2 class="unnumbered">yada</h2>
+
+   <p>This manual is for <abbr title="yet another database abstraction">yada</abbr> (yet another database abstraction) version
+0.11.0.
+
+<ul class="menu">
+<li><a accesskey="1" href="#Introduction">Introduction</a>
+<li><a accesskey="2" href="#Installing">Installing</a>
+<li><a accesskey="3" href="#API">API</a>
+<li><a accesskey="4" href="#Module-API">Module API</a>
+<li><a accesskey="5" href="#Examples">Examples</a>
+<li><a accesskey="6" href="#Index">Index</a>
+</ul>
+
+<div class="node">
+<p><hr>
+<a name="Introduction"></a>
+Next:&nbsp;<a rel="next" accesskey="n" href="#Installing">Installing</a>,
+Previous:&nbsp;<a rel="previous" accesskey="p" href="#Top">Top</a>,
+Up:&nbsp;<a rel="up" accesskey="u" href="#Top">Top</a>
+
+</div>
+
+<h2 class="chapter">1 Introduction</h2>
+
+<p>Yada is a c library that abstracts SQL databases aiming at allowing transparent
+use of multiple databases.  The goal in mind is to make a common interface to
+multiple databases, thus stopping the need for application developers to write
+different modules for each SQL backend they want to support.  It's also useful
+for caching data in different database types.
+
+   <p>To accomplish this, it uses a compatibility layer of functions to bind input
+and output variables, prepare statements, and retrieve data. Functionality and
+concept are somewhat like perl's DBI, and hopefully somewhat improved.
+
+   <p>Currently there are modules for MySQL, Oracle, PostgreSQL, and SQLite3.  Most
+features work in most modules, but all don't work everywhere yet, so please see
+the file <samp><span class="file">README.modules</span></samp> from the source distribution for details.
+
+<ul class="menu">
+<li><a accesskey="1" href="#Where-to-get">Where to get</a>
+<li><a accesskey="2" href="#Reporting-bugs">Reporting bugs</a>
+<li><a accesskey="3" href="#Contributing">Contributing</a>
+</ul>
+
+<div class="node">
+<p><hr>
+<a name="Where-to-get"></a>
+Next:&nbsp;<a rel="next" accesskey="n" href="#Reporting-bugs">Reporting bugs</a>,
+Up:&nbsp;<a rel="up" accesskey="u" href="#Introduction">Introduction</a>
+
+</div>
+
+<h3 class="section">1.1 Where to get</h3>
+
+<p>The latest version of yada is always available via http from
+<a href="http://oss.devit.com/yada">http://oss.devit.com/yada</a> or via ftp from
+<a href="ftp://ftp.devit.com/yada/">ftp://ftp.devit.com/yada/</a>.
+
+<div class="node">
+<p><hr>
+<a name="Reporting-bugs"></a>
+Next:&nbsp;<a rel="next" accesskey="n" href="#Contributing">Contributing</a>,
+Previous:&nbsp;<a rel="previous" accesskey="p" href="#Where-to-get">Where to get</a>,
+Up:&nbsp;<a rel="up" accesskey="u" href="#Introduction">Introduction</a>
+
+</div>
+
+<h3 class="section">1.2 Reporting bugs</h3>
+
+<p>We welcome bug reports and suggestions for any aspect of yada, please email
+them to <a href="mailto:yada@devit.com">yada@devit.com</a>.
+
+   <p>For bug reports, please include enough information for us to reproduce the
+problem.  Generally speaking, that means:
+
+     <ul>
+<li>the version number of yada and any other programs involved. 
+<li>hardware and operating system names and versions. 
+<li>the schema for any tables necessary to reproduce the bug. 
+<li>a description of the problem and samples of any erroneous output. 
+<li>any unusual options you gave to <samp><span class="command">configure</span></samp>. 
+<li>anything else that you think would be helpful. 
+</ul>
+
+   <p>When in doubt whether something is needed or not, include it.  It's
+better to include too much than to leave out something important.
+
+<div class="node">
+<p><hr>
+<a name="Contributing"></a>
+Previous:&nbsp;<a rel="previous" accesskey="p" href="#Reporting-bugs">Reporting bugs</a>,
+Up:&nbsp;<a rel="up" accesskey="u" href="#Introduction">Introduction</a>
+
+</div>
+
+<h3 class="section">1.3 Contributing</h3>
+
+<p>Patches are most welcome; if possible, please make them with
+`<samp><span class="samp">diff&nbsp;-c<!-- /@w --></span></samp>' and include <samp><span class="file">ChangeLog</span></samp> entries.
+
+   <p>When sending patches, if possible please do not encode or split them in
+any way; it's much easier to deal with one plain text message, however
+large, than many small ones.
+
+<div class="node">
+<p><hr>
+<a name="Installing"></a>
+Next:&nbsp;<a rel="next" accesskey="n" href="#API">API</a>,
+Previous:&nbsp;<a rel="previous" accesskey="p" href="#Introduction">Introduction</a>,
+Up:&nbsp;<a rel="up" accesskey="u" href="#Top">Top</a>
+
+</div>
+
+<h2 class="chapter">2 Installing</h2>
+
+<p>To use the default options, simply type
+
+   <p><samp><span class="command">./configure</span></samp>
+
+   <p><samp><span class="command">make</span></samp>
+
+   <p><samp><span class="command">make install</span></samp>
+
+<h3 class="section">2.1 configuring</h3>
+
+<p><samp><span class="command">configure</span></samp> with options you want
+
+   <p>Some notable ones are:
+
+     <dl>
+<dt><samp><span class="option">--enable-debug</span></samp><dd>Compiles with -g and enables debugging messages written to stderr. 
+To just compile with -g, set the environment variable <samp><span class="env">CFLAGS</span></samp>
+accordingly.
+
+     <br><dt><samp><span class="option">--enable-ltdl-install</span></samp><dd>Force the installation of the bundled libltdl
+</dl>
+
+   <p>Currently supported database types:
+     <dl>
+<dt><samp><span class="option">--with[out]-mysql</span></samp><dd>MySQL
+<br><dt><samp><span class="option">--with[out]-oracle</span></samp><dd>Oracle
+<br><dt><samp><span class="option">--with[out]-pgsql</span></samp><dd>PostgreSQL
+<br><dt><samp><span class="option">--with[out]-sqlite3</span></samp><dd>SQLite 3
+</dl>
+
+<h3 class="section">2.2 Configuring for different database types</h3>
+
+     <dl>
+<dt><samp><span class="option">--with-</span><var>db_type</var><span class="option">[=<samp>DIR</samp>]</span></samp><dd>Look under <samp><span class="file">DIR</span></samp> for includes and libs
+<br><dt><samp><span class="option">--with-</span><var>db_type</var><span class="option">-incdir=<samp>DIR</samp></span></samp><dd>Look in <samp><span class="file">DIR</span></samp> for includes
+<br><dt><samp><span class="option">--with-</span><var>db_type</var><span class="option">-libdir=<samp>DIR</samp></span></samp><dd>Look in <samp><span class="file">DIR</span></samp> for libs
+</dl>
+
+   <p>There are a few options for defining the proper locations for database
+libraries. <samp><span class="option">--with-</span><var>db_type</var></samp>, the default, will search common
+installation locations.  If you set <samp><span class="option">--with-</span><var>db_type</var><span class="option">=</span></samp><samp><span class="file">DIR</span></samp> it
+will look in <samp><span class="file">DIR/include</span></samp> and <samp><span class="file">DIR/lib</span></samp> for headers and libraries
+respectively.  To get more specific, you may use
+<samp><span class="option">--with-</span><var>db_type</var><span class="option">-incdir=</span></samp><samp><span class="file">DIR</span></samp>
+<samp><span class="option">--with-</span><var>db_type</var><span class="option">-libdir=</span></samp><samp><span class="file">DIR</span></samp> to set each of the directories
+where the files can be found.
+
+   <p>When configure is done, to install simply:
+
+   <p><samp><span class="command">make</span></samp>
+
+   <p><samp><span class="command">make install</span></samp>
+
+<div class="node">
+<p><hr>
+<a name="API"></a>
+Next:&nbsp;<a rel="next" accesskey="n" href="#Module-API">Module API</a>,
+Previous:&nbsp;<a rel="previous" accesskey="p" href="#Installing">Installing</a>,
+Up:&nbsp;<a rel="up" accesskey="u" href="#Top">Top</a>
+
+</div>
+
+<h2 class="chapter">3 API</h2>
+
+<p>To use yada, you must first initialize the library with
+<code><a href="#yada_005finit">yada_init</a></code>() which will return a pointer to a yada
+object.  The object may then be used to call the other functions as pointers
+from the base obj (i.e., <code>yada-&gt;<a href="#connect">connect</a>()</code>).
+
+   <p>If at any time a yada function returns an error, error code may be checked at
+<code>yada-&gt;<a href="#error">error</a></code> and error message at <code>yada-&gt;<a href="#errmsg">errmsg</a></code>,
+except for <a href="#yada_005finit"><code>yada_init()</code></a>, in which case error will be stored in errno.
+
+<ul class="menu">
+<li><a accesskey="1" href="#Control-functions">Control functions</a>
+<li><a accesskey="2" href="#Statement-preparation">Statement preparation</a>
+<li><a accesskey="3" href="#Statement-execution">Statement execution</a>
+<li><a accesskey="4" href="#Result-retrieval">Result retrieval</a>
+<li><a accesskey="5" href="#Transactions">Transactions</a>
+<li><a accesskey="6" href="#Variables">Variables</a>
+<li><a accesskey="7" href="#Resource-types">Resource types</a>
+<li><a accesskey="8" href="#Token-types">Token types</a>
+</ul>
+
+<div class="node">
+<p><hr>
+<a name="Control-functions"></a>
+Next:&nbsp;<a rel="next" accesskey="n" href="#Statement-preparation">Statement preparation</a>,
+Up:&nbsp;<a rel="up" accesskey="u" href="#API">API</a>
+
+</div>
+
+<h3 class="section">3.1 Control functions</h3>
+
+<ul class="menu">
+<li><a accesskey="1" href="#yada_005finit">yada_init</a>
+<li><a accesskey="2" href="#connect">connect</a>
+<li><a accesskey="3" href="#disconnect">disconnect</a>
+<li><a accesskey="4" href="#destroy">destroy</a>
+<li><a accesskey="5" href="#free">free</a>
+<li><a accesskey="6" href="#freeall">freeall</a>
+</ul>
+
+<p><a name="index-yada_005finit-1"></a><div class="node">
+<p><hr>
+<a name="yada_init"></a>
+<a name="yada_005finit"></a>
+Next:&nbsp;<a rel="next" accesskey="n" href="#connect">connect</a>,
+Up:&nbsp;<a rel="up" accesskey="u" href="#Control-functions">Control functions</a>
+
+</div>
+
+<h4 class="unnumberedsubsec"><code>yada_t* yada_init(char *dbstr, unsigned int flags)</code></h4>
+
+     <dl>
+<dt><span class="sc">Parameters</span><br><dt><var>dbstr</var><dd>a string defining the yada database to initialize
+<br><dt><var>flags</var><dd>currently unused
+</dl>
+
+     <dl>
+<dt><span class="sc">Returns</span><br><dt><var>on success</var><dd>yada struct pointer
+<br><dt><var>on failure</var><dd>NULL
+</dl>
+
+   <p>Initializes the yada library and returns a pointer to a yada object of the
+database type specified in <code>db_str</code>, a string made up of <var>database
+type</var>:[<var>type specific connection options</var>].  Once this is done, the other
+functions may be called from this base obj (i.e., <code>yada-&gt;connect()</code>).
+
+   <p><a name="index-connect-2"></a><div class="node">
+<p><hr>
+<a name="connect"></a>
+Next:&nbsp;<a rel="next" accesskey="n" href="#disconnect">disconnect</a>,
+Previous:&nbsp;<a rel="previous" accesskey="p" href="#yada_005finit">yada_init</a>,
+Up:&nbsp;<a rel="up" accesskey="u" href="#Control-functions">Control functions</a>
+
+</div>
+
+<h4 class="unnumberedsubsec"><code>int connect(yada_t *yada, char *user, char *pass)</code></h4>
+
+     <dl>
+<dt><span class="sc">Parameters</span><br><dt><var>user</var><dd>username for database connection, if needed
+<br><dt><var>pass</var><dd>password for database connection, if needed
+</dl>
+
+     <dl>
+<dt><span class="sc">Returns</span><br><dt><var>on success</var><dd>non-zero
+<br><dt><var>on failure</var><dd>0
+</dl>
+
+   <p>Attempts to connect to the database defined in the <code>db_str</code> passed to
+<code>yada_init()</code>, using user and pass if needed by the database type being
+connected to.
+
+   <p><a name="index-disconnect-3"></a><div class="node">
+<p><hr>
+<a name="disconnect"></a>
+Next:&nbsp;<a rel="next" accesskey="n" href="#destroy">destroy</a>,
+Previous:&nbsp;<a rel="previous" accesskey="p" href="#connect">connect</a>,
+Up:&nbsp;<a rel="up" accesskey="u" href="#Control-functions">Control functions</a>
+
+</div>
+
+<h4 class="unnumberedsubsec"><code>void disconnect(yada_t *yada)</code></h4>
+
+<p>Disconnect from the database.
+
+   <p><a name="index-destroy-4"></a><div class="node">
+<p><hr>
+<a name="destroy"></a>
+Next:&nbsp;<a rel="next" accesskey="n" href="#free">free</a>,
+Previous:&nbsp;<a rel="previous" accesskey="p" href="#disconnect">disconnect</a>,
+Up:&nbsp;<a rel="up" accesskey="u" href="#Control-functions">Control functions</a>
+
+</div>
+
+<h4 class="unnumberedsubsec"><code>void destroy(yada_t* yada)</code></h4>
+
+<p>Closes the database connection, frees all memory used by yada,
+and therefore invalidates the yada struct.
+
+   <p><a name="index-free-5"></a><div class="node">
+<p><hr>
+<a name="free"></a>
+Next:&nbsp;<a rel="next" accesskey="n" href="#freeall">freeall</a>,
+Previous:&nbsp;<a rel="previous" accesskey="p" href="#destroy">destroy</a>,
+Up:&nbsp;<a rel="up" accesskey="u" href="#Control-functions">Control functions</a>
+
+</div>
+
+<h4 class="unnumberedsubsec"><code>void free(yada_t *yada, yada_rc_t *yada_rc)</code></h4>
+
+     <dl>
+<dt><span class="sc">Parameters</span><br><dt><var>yada_rc</var><dd>pointer to the yada resource to free
+</dl>
+
+   <p>Frees the resource pointed to by <var>yada_rc</var>.
+
+   <p><a name="index-freeall-6"></a><div class="node">
+<p><hr>
+<a name="freeall"></a>
+Previous:&nbsp;<a rel="previous" accesskey="p" href="#free">free</a>,
+Up:&nbsp;<a rel="up" accesskey="u" href="#Control-functions">Control functions</a>
+
+</div>
+
+<h4 class="unnumberedsubsec"><code>void freeall(yada_t *yada, int type)</code></h4>
+
+     <dl>
+<dt><span class="sc">Parameters</span><br><dt><var>type</var><dd>OR-able set of <a href="#Resource-types">Resource types</a> or -1 for all
+</dl>
+
+   <p>Frees all memory used by yada resources of type <var>type</var>, an OR-able
+set of <a href="#Resource-types">Resource types</a>.  If type is -1, it will free all resources.
+
+<div class="node">
+<p><hr>
+<a name="Statement-preparation"></a>
+Next:&nbsp;<a rel="next" accesskey="n" href="#Statement-execution">Statement execution</a>,
+Previous:&nbsp;<a rel="previous" accesskey="p" href="#Control-functions">Control functions</a>,
+Up:&nbsp;<a rel="up" accesskey="u" href="#API">API</a>
+
+</div>
+
+<h3 class="section">3.2 Statement preparation</h3>
+
+<p>These functions prepare a string for execution, allowing mapping of input
+variables to be passed to execute.  Preparing will be done either by native
+database prepares, or by yada prepare.
+
+   <p>Yada prepare is a bit less strict that most databases are, so it's possible to
+put a placeholder anywhere, including SQL commands or table names.
+
+<ul class="menu">
+<li><a accesskey="1" href="#prepare">prepare</a>
+<li><a accesskey="2" href="#preparef">preparef</a>
+<li><a accesskey="3" href="#yprepare">yprepare</a>
+<li><a accesskey="4" href="#ypreparef">ypreparef</a>
+<li><a accesskey="5" href="#xprepare">xprepare</a>
+</ul>
+
+   <p><a name="index-prepare-7"></a><div class="node">
+<p><hr>
+<a name="prepare"></a>
+Next:&nbsp;<a rel="next" accesskey="n" href="#preparef">preparef</a>,
+Up:&nbsp;<a rel="up" accesskey="u" href="#Statement-preparation">Statement preparation</a>
+
+</div>
+
+<h4 class="unnumberedsubsec"><code>yada_rc_t* prepare(yada_t *yada, char *str, int strlen)</code></h4>
+
+     <dl>
+<dt><span class="sc">Parameters</span><br><dt><var>str</var><dd>statement to be prepared
+<br><dt><var>strlen</var><dd>length of the string, or 0 for a null terminated string
+</dl>
+
+     <dl>
+<dt><span class="sc">Returns</span><br><dt><var>on success</var><dd>yada resource pointing to the prepared statement
+<br><dt><var>on failure</var><dd>NULL
+</dl>
+
+   <p>Prepares a string for execution using the native database prepared statements
+if available, if not falls back to <a href="#yprepare">yprepare</a>().
+
+   <p><a name="index-preparef-8"></a><div class="node">
+<p><hr>
+<a name="preparef"></a>
+Next:&nbsp;<a rel="next" accesskey="n" href="#yprepare">yprepare</a>,
+Previous:&nbsp;<a rel="previous" accesskey="p" href="#prepare">prepare</a>,
+Up:&nbsp;<a rel="up" accesskey="u" href="#Statement-preparation">Statement preparation</a>
+
+</div>
+
+<h4 class="unnumberedsubsec"><code>yada_rc_t* preparef(yada_t *yada, char *format, ...)</code></h4>
+
+     <dl>
+<dt><span class="sc">Parameters</span><br><dt><var>format</var><dd>format of string to be prepared
+<br><dt><var>...</var><dd>arguments to format
+</dl>
+
+     <dl>
+<dt><span class="sc">Returns</span><br><dt><var>on success</var><dd>yada resource pointing to the prepared statement
+<br><dt><var>on failure</var><dd>NULL
+</dl>
+
+   <p>Creates a string from <var>format</var> and it's arguments using standard printf
+tokens and then uses it to prepares a statement.  Uses the database's native
+prepared statements if available, if not falls back to <a href="#ypreparef">ypreparef</a>().
+
+   <p><a name="index-yprepare-9"></a><div class="node">
+<p><hr>
+<a name="yprepare"></a>
+Next:&nbsp;<a rel="next" accesskey="n" href="#ypreparef">ypreparef</a>,
+Previous:&nbsp;<a rel="previous" accesskey="p" href="#preparef">preparef</a>,
+Up:&nbsp;<a rel="up" accesskey="u" href="#Statement-preparation">Statement preparation</a>
+
+</div>
+
+<h4 class="unnumberedsubsec"><code>yada_rc_t* yprepare(yada_t *yada, char *str, int strlen)</code></h4>
+
+     <dl>
+<dt><span class="sc">Parameters</span><br><dt><var>str</var><dd>statement to be prepared
+<br><dt><var>strlen</var><dd>length of the string, or 0 for a null terminated string
+</dl>
+
+     <dl>
+<dt><span class="sc">Returns</span><br><dt><var>on success</var><dd>yada resource pointing to the prepared statement
+<br><dt><var>on failure</var><dd>NULL
+</dl>
+
+   <p>Prepares a string for execution using yada prepared statements.
+
+   <p><a name="index-ypreparef-10"></a><div class="node">
+<p><hr>
+<a name="ypreparef"></a>
+Next:&nbsp;<a rel="next" accesskey="n" href="#xprepare">xprepare</a>,
+Previous:&nbsp;<a rel="previous" accesskey="p" href="#yprepare">yprepare</a>,
+Up:&nbsp;<a rel="up" accesskey="u" href="#Statement-preparation">Statement preparation</a>
+
+</div>
+
+<h4 class="unnumberedsubsec"><code>yada_rc_t* ypreparef(yada_t *yada, char *format, ...)</code></h4>
+
+     <dl>
+<dt><span class="sc">Parameters</span><br><dt><var>format</var><dd>format of string to be prepared
+<br><dt><var>...</var><dd>arguments to format
+</dl>
+
+     <dl>
+<dt><span class="sc">Returns</span><br><dt><var>on success</var><dd>yada resource pointing to the prepared statement
+<br><dt><var>on failure</var><dd>NULL
+</dl>
+
+   <p>Creates a string from <var>format</var> and it's arguments using standard printf
+tokens and then uses it to prepares a statement.  Uses the yada prepared
+statements.
+
+   <p><a name="index-xprepare-11"></a><div class="node">
+<p><hr>
+<a name="xprepare"></a>
+Previous:&nbsp;<a rel="previous" accesskey="p" href="#ypreparef">ypreparef</a>,
+Up:&nbsp;<a rel="up" accesskey="u" href="#Statement-preparation">Statement preparation</a>
+
+</div>
+
+<h4 class="unnumberedsubsec"><code>yada_rc_t* xprepare(yada_t *yada, int flags, char *str, ...)</code></h4>
+
+     <dl>
+<dt><span class="sc">Parameters</span><br><dt><var>flags</var><dd>prepare options
+<br><dt><var>str</var><dd>statement to be prepared
+<br><dt><var>...</var><dd>arguments to prepare
+</dl>
+
+     <dl>
+<dt><span class="sc">Returns</span><br><dt><var>on success</var><dd>yada resource pointing to the prepared statement
+<br><dt><var>on failure</var><dd>NULL
+</dl>
+
+   <p>Extensible prepare, uses <var>flags</var> options to decide how to prepare the
+statement.  This is for future use, as right now the only flag combinations can
+be done with the above 4 statements.
+
+<div class="node">
+<p><hr>
+<a name="Statement-execution"></a>
+Next:&nbsp;<a rel="next" accesskey="n" href="#Result-retrieval">Result retrieval</a>,
+Previous:&nbsp;<a rel="previous" accesskey="p" href="#Statement-preparation">Statement preparation</a>,
+Up:&nbsp;<a rel="up" accesskey="u" href="#API">API</a>
+
+</div>
+
+<h3 class="section">3.3 Statement execution</h3>
+
+<ul class="menu">
+<li><a accesskey="1" href="#execute">execute</a>
+<li><a accesskey="2" href="#query">query</a>
+<li><a accesskey="3" href="#dumpexec">dumpexec</a>
+</ul>
+
+<p><a name="index-execute-12"></a><div class="node">
+<p><hr>
+<a name="execute"></a>
+Next:&nbsp;<a rel="next" accesskey="n" href="#query">query</a>,
+Up:&nbsp;<a rel="up" accesskey="u" href="#Statement-execution">Statement execution</a>
+
+</div>
+
+<h4 class="unnumberedsubsec"><code>int execute(yada_t *yada, void *magic, ...)</code></h4>
+
+     <dl>
+<dt><span class="sc">Parameters</span><br><dt><var>magic</var><dd>Statement to execute, either a statement string or a prepared <code>yada_rc*</code>
+<br><dt><var>...</var><dd>if <var>magic</var> is a string, should be it's length or 0 for NULL terminated
+
+     <p>if <var>magic</var> is a prepared <code>yada_rc*</code>, placeholder variables should follow
+</dl>
+
+     <dl>
+<dt><span class="sc">Returns</span><br><dt><var>on success</var><dd>number of rows affected
+<br><dt><var>on failure</var><dd>-1
+</dl>
+
+   <p>Executes the statement, doesn't not return results so it shouldn't be used for
+select type statements;
+
+   <p><a name="index-query-13"></a><div class="node">
+<p><hr>
+<a name="query"></a>
+Next:&nbsp;<a rel="next" accesskey="n" href="#dumpexec">dumpexec</a>,
+Previous:&nbsp;<a rel="previous" accesskey="p" href="#execute">execute</a>,
+Up:&nbsp;<a rel="up" accesskey="u" href="#Statement-execution">Statement execution</a>
+
+</div>
+
+<h4 class="unnumberedsubsec"><code>yada_rc_t* query(yada_t *yada, void *magic, ...)</code></h4>
+
+     <dl>
+<dt><span class="sc">Parameters</span><br><dt><var>magic</var><dd>Statement to execute, either a statement string or a prepared resource(<code>yada_rc*</code>)
+<br><dt><var>...</var><dd>if <var>magic</var> is a string, should be it's length or 0 for NULL terminated
+
+     <p>if <var>magic</var> is a prepared resource, placeholder variables should follow
+</dl>
+
+     <dl>
+<dt><span class="sc">Returns</span><br><dt><var>on success</var><dd>resource containing a result set
+<br><dt><var>on failure</var><dd>NULL
+</dl>
+
+   <p>Executes the statement and returns a result set resource
+
+   <p><a name="index-dumpexec-14"></a><div class="node">
+<p><hr>
+<a name="dumpexec"></a>
+Previous:&nbsp;<a rel="previous" accesskey="p" href="#query">query</a>,
+Up:&nbsp;<a rel="up" accesskey="u" href="#Statement-execution">Statement execution</a>
+
+</div>
+
+<h4 class="unnumberedsubsec"><code>char* dumpexec(yada_t *yada, int *retlen,  yada_rc_t *prep, ...)</code></h4>
+
+<p><strong>Note</strong> only works with yprepared statements
+
+     <dl>
+<dt><span class="sc">Parameters</span><br><dt><var>retlen</var><dd>if not NULL, the length of the returned string will be put into it
+<br><dt><var>prep</var><br><dt><var>...</var><dd>placeholder variables if needed for <var>prep</var>
+</dl>
+
+     <dl>
+<dt><span class="sc">Returns</span><br><dt><var>on success</var><dd>string of the processed statement
+<br><dt><var>on failure</var><dd>NULL
+</dl>
+
+   <p>Functions exactly the same as execute, only instead of executing the statement once it's compiled, it returns it as a string.
+
+<div class="node">
+<p><hr>
+<a name="Result-retrieval"></a>
+Next:&nbsp;<a rel="next" accesskey="n" href="#Transactions">Transactions</a>,
+Previous:&nbsp;<a rel="previous" accesskey="p" href="#Statement-execution">Statement execution</a>,
+Up:&nbsp;<a rel="up" accesskey="u" href="#API">API</a>
+
+</div>
+
+<h3 class="section">3.4 Result retrieval</h3>
+
+<ul class="menu">
+<li><a accesskey="1" href="#bind">bind</a>
+<li><a accesskey="2" href="#fetch">fetch</a>
+</ul>
+
+<p><a name="index-bind-15"></a><div class="node">
+<p><hr>
+<a name="bind"></a>
+Next:&nbsp;<a rel="next" accesskey="n" href="#fetch">fetch</a>,
+Up:&nbsp;<a rel="up" accesskey="u" href="#Result-retrieval">Result retrieval</a>
+
+</div>
+
+<h4 class="unnumberedsubsec"><code>yada_rc_t* bind(yada_t *yada, char *map, ...)</code></h4>
+
+     <dl>
+<dt><span class="sc">Parameters</span><br><dt><var>map</var><dd>string containing a list of the variable types
+<br><dt><var>...</var><dd>list of the variables to bind
+</dl>
+
+     <dl>
+<dt><span class="sc">Returns</span><br><dt><var>on success</var><dd>resource containing a bind set
+<br><dt><var>on failure</var><dd>NULL
+</dl>
+
+   <p>Makes a mapping of variables to results.  It expects pointers to actual storage
+space to put the variable into, or if the type is preceded by `<samp><span class="samp">p</span></samp>',
+expects a pointer to a pointer which will be set to the retrieved data that
+will be stored internally.
+
+   <p>For example, to bind directly to an int and as a pointer to a string, you would do something like this:
+
+<pre class="example">     <code>brc = yada-&gt;bind(yada, "?d?ps", (int *)&amp;i, (char **)&amp;str);</code>
+</pre>
+   <p>See <a href="#Token-types">Token types</a>, for a list of the supported variables types.
+
+   <p>See <a href="#fetch_002dnull_002dcolumn">fetch</a>, for information on how fetch treats these variables when a column is null, see
+
+   <p><a name="index-fetch-16"></a><div class="node">
+<p><hr>
+<a name="fetch"></a>
+Previous:&nbsp;<a rel="previous" accesskey="p" href="#bind">bind</a>,
+Up:&nbsp;<a rel="up" accesskey="u" href="#Result-retrieval">Result retrieval</a>
+
+</div>
+
+<h4 class="unnumberedsubsec"><code>int fetch(yada_t *yada, yada_rc_t *res, yada_rc_t *bindset)</code></h4>
+
+     <dl>
+<dt><span class="sc">Parameters</span><br><dt><var>res</var><dd>result set resource
+<br><dt><var>bindset</var><dd>bind set resource
+</dl>
+
+     <dl>
+<dt><span class="sc">Returns</span><br><dt><var>on success</var><dd>non zero
+<br><dt><var>on failure</var><dd>0
+</dl>
+
+   <p>Retrieves the next row of results into the variables mapped by <var>bindset</var>.
+
+   <p><a name="fetch_002dnull_002dcolumn"></a>
+If a column is NULL:
+     <ul>
+<li>binary length variables will be unset
+<li>pointer variables will be set to NULL
+<li>the first byte of strings will be set to NULL
+</ul>
+
+<div class="node">
+<p><hr>
+<a name="Transactions"></a>
+Next:&nbsp;<a rel="next" accesskey="n" href="#Variables">Variables</a>,
+Previous:&nbsp;<a rel="previous" accesskey="p" href="#Result-retrieval">Result retrieval</a>,
+Up:&nbsp;<a rel="up" accesskey="u" href="#API">API</a>
+
+</div>
+
+<h3 class="section">3.5 Transactions</h3>
+
+<ul class="menu">
+<li><a accesskey="1" href="#trx">trx</a>
+<li><a accesskey="2" href="#commit">commit</a>
+<li><a accesskey="3" href="#rollback">rollback</a>
+</ul>
+
+<p><a name="index-trx-17"></a><div class="node">
+<p><hr>
+<a name="trx"></a>
+Next:&nbsp;<a rel="next" accesskey="n" href="#commit">commit</a>,
+Up:&nbsp;<a rel="up" accesskey="u" href="#Transactions">Transactions</a>
+
+</div>
+
+<h4 class="unnumberedsubsec"><code>int trx(yada_t* yada, int flags)</code></h4>
+
+     <dl>
+<dt><span class="sc">Parameters</span><br><dt><var>flags</var><dd>unused
+</dl>
+
+     <dl>
+<dt><span class="sc">Returns</span><br><dt><var>on success</var><dd>0
+<br><dt><var>on failure</var><dd>non-zero
+</dl>
+
+   <p>Begins a transaction, flags (currently unused) will allow you to start
+different types of transactions.
+
+   <p><a name="index-commit-18"></a><div class="node">
+<p><hr>
+<a name="commit"></a>
+Next:&nbsp;<a rel="next" accesskey="n" href="#rollback">rollback</a>,
+Previous:&nbsp;<a rel="previous" accesskey="p" href="#trx">trx</a>,
+Up:&nbsp;<a rel="up" accesskey="u" href="#Transactions">Transactions</a>
+
+</div>
+
+<h4 class="unnumberedsubsec"><code>int commit(yada_t* yada)</code></h4>
+
+     <dl>
+<dt><span class="sc">Returns</span><br><dt><var>on success</var><dd>0
+<br><dt><var>on failure</var><dd>non-zero
+</dl>
+
+   <p>Commit the current transaction causing any changes made to be saved.
+
+   <p><a name="index-rollback-19"></a><div class="node">
+<p><hr>
+<a name="rollback"></a>
+Previous:&nbsp;<a rel="previous" accesskey="p" href="#commit">commit</a>,
+Up:&nbsp;<a rel="up" accesskey="u" href="#Transactions">Transactions</a>
+
+</div>
+
+<h4 class="unnumberedsubsec"><code>int rollback(yada_t* yada, int flags)</code></h4>
+
+     <dl>
+<dt><span class="sc">Parameters</span><br><dt><var>flags</var><dd>unused
+</dl>
+
+     <dl>
+<dt><span class="sc">Returns</span><br><dt><var>on success</var><dd>0
+<br><dt><var>on failure</var><dd>non-zero
+</dl>
+
+   <p>Rollback the current transaction undoing any transactional changes.
+
+<div class="node">
+<p><hr>
+<a name="Variables"></a>
+Next:&nbsp;<a rel="next" accesskey="n" href="#Resource-types">Resource types</a>,
+Previous:&nbsp;<a rel="previous" accesskey="p" href="#Transactions">Transactions</a>,
+Up:&nbsp;<a rel="up" accesskey="u" href="#API">API</a>
+
+</div>
+
+<h3 class="section">3.6 Variables</h3>
+
+<p>Read only variables available on the yada struct.
+
+<ul class="menu">
+<li><a accesskey="1" href="#error">error</a>
+<li><a accesskey="2" href="#errmsg">errmsg</a>
+</ul>
+
+   <p><a name="index-error-20"></a><div class="node">
+<p><hr>
+<a name="error"></a>
+Next:&nbsp;<a rel="next" accesskey="n" href="#errmsg">errmsg</a>,
+Up:&nbsp;<a rel="up" accesskey="u" href="#Variables">Variables</a>
+
+</div>
+
+<h4 class="unnumberedsubsec"><code>int error</code></h4>
+
+<p>Error code of the last error that occurred.
+
+   <p><a name="index-errmsg-21"></a><div class="node">
+<p><hr>
+<a name="errmsg"></a>
+Previous:&nbsp;<a rel="previous" accesskey="p" href="#error">error</a>,
+Up:&nbsp;<a rel="up" accesskey="u" href="#Variables">Variables</a>
+
+</div>
+
+<h4 class="unnumberedsubsec"><code>char *errmsg</code></h4>
+
+<p>Error message for the last error that occurred.
+
+<div class="node">
+<p><hr>
+<a name="Resource-types"></a>
+Next:&nbsp;<a rel="next" accesskey="n" href="#Token-types">Token types</a>,
+Previous:&nbsp;<a rel="previous" accesskey="p" href="#Variables">Variables</a>,
+Up:&nbsp;<a rel="up" accesskey="u" href="#API">API</a>
+
+</div>
+
+<h3 class="section">3.7 Resource types</h3>
+
+     
+<a name="index-YADA_005fSTATEMENT-22"></a>
+<dl><dt><dfn>YADA_STATEMENT</dfn><dd>prepared statements returned from <code>prepare()</code>
+
+     <p><a name="index-YADA_005fRESULT-23"></a><br><dt><dfn>YADA_RESULT</dfn><dd>result sets returned from <code>query()</code>
+
+     <p><a name="index-YADA_005fBINDSET-24"></a><br><dt><dfn>YADA_BINDSET</dfn><dd>bind sets as returned from <code>bind()</code>
+</dl>
+
+<div class="node">
+<p><hr>
+<a name="Token-types"></a>
+Previous:&nbsp;<a rel="previous" accesskey="p" href="#Resource-types">Resource types</a>,
+Up:&nbsp;<a rel="up" accesskey="u" href="#API">API</a>
+
+</div>
+
+<h3 class="section">3.8 Token types</h3>
+
+<p>Yada tokens are used to define variable types in both <code>prepare()</code> and
+<code>bind()</code>.  Tokens are specified with a question mark (`<samp><span class="samp">?</span></samp>') followed
+by the letter for the type.  To specify the variable is a pointer, use a
+question mark followed by a `<samp><span class="samp">p</span></samp>' and then followed by the type letter. 
+Currently this is only used in <code>bind()</code>.
+
+   <p>Token types are as follows:
+
+     <dl>
+<dt><dfn>a</dfn><dd>escaped binary string
+
+     <br><dt><dfn>b</dfn><dd>binary string - a binary string is a pair of variables, a <code>char*</code> string,
+and an <code>unsigned long</code> length. Whenever you need to pass the string
+variable, you should pass the length variable next.  When used with
+<code>bind()</code> and an execute function is called, the len variable is always an
+<code>unsigned long</code> and never a pointer, even if the binary string is a
+pointer (`<samp><span class="samp">?pb</span></samp>').
+
+     <br><dt><dfn>d</dfn><dd>32 bit integer, signed or unsigned
+
+     <br><dt><dfn>e</dfn><dd>escaped string
+
+     <br><dt><dfn>l</dfn><dd>64 bit integer, signed or unsigned
+
+     <br><dt><dfn>s</dfn><dd>string - NULL terminated <code>char*</code>
+
+     <br><dt><dfn>v</dfn><dd>variable - a variable is like an escaped string except yada will surround it with single quotes (`<samp><span class="samp">'</span></samp>') if it's set, or replace it with the with the string `<samp><span class="samp">NULL</span></samp>' if null.
+
+     <p>Escaped variables are the same as the variable, except any characters
+       needing escaping are escaped (this differs with the type of database it
+       is). 
+</dl>
+
+<div class="node">
+<p><hr>
+<a name="Module-API"></a>
+Next:&nbsp;<a rel="next" accesskey="n" href="#Examples">Examples</a>,
+Previous:&nbsp;<a rel="previous" accesskey="p" href="#API">API</a>,
+Up:&nbsp;<a rel="up" accesskey="u" href="#Top">Top</a>
+
+</div>
+
+<h2 class="chapter">4 Module API</h2>
+
+<p>This is where the documentation and internal API description for making yada
+modules will go.  Until then, grab an already made module and start from there,
+the code is fairly well documented.
+
+<div class="node">
+<p><hr>
+<a name="Examples"></a>
+Next:&nbsp;<a rel="next" accesskey="n" href="#Index">Index</a>,
+Previous:&nbsp;<a rel="previous" accesskey="p" href="#Module-API">Module API</a>,
+Up:&nbsp;<a rel="up" accesskey="u" href="#Top">Top</a>
+
+</div>
+
+<h2 class="chapter">5 Examples</h2>
+
+<p>Here is a simple example showing how to do a basic prepared insert, and bind to
+an output variable.  For more examples, see test/yada_test.c in the source
+distribution.
+
+<pre class="verbatim">
+  int intcol;
+  yada_t *yada;
+  yada_rc_t *brc, *res, *stmt;
+
+
+  /* init and connect to yada */
+  if(!(yada = yada_init("mysql:localhost", 0))) {
+    errmsg("Failed to initialize yada: %s\n", strerror(errno));
+    return(1);
+  }
+
+  /* prepare insert statement */
+  if(!(stmt = yada->yprepare(yada, "insert into test (intcol) values (?d)", 0))) {
+    errmsg("Failed to prepare insert: %s\n", yada->errmsg);
+    yada->destroy(yada);
+    return(1);
+  }
+
+  /* bind column to intcol */
+  if(!(brc = yada->bind(yada, "?d", &amp;intcol))) {
+  }
+
+  /* connect to database */
+  if(!yada->connect(yada, "scott", "tiger")) {
+    errmsg("Failed to connect: %s\n", yada->errmsg);
+    yada->destroy(yada);
+    return(1);
+  }
+
+  /* insert a row */
+  if(yada->execute(yada, stmt, 5) == -1) {
+    errmsg("Failed to insert: %s\n", yada->errmsg);
+    yada->destroy(yada);
+    return(1);
+  }
+
+  /* free prepared insert statement */
+  yada->free(stmt);
+
+  /* query all rows */
+  if(!(res = yada->query(yada, "select intcol from yada_test", 0))) {
+    errmsg("Failed to insert: %s\n", yada->errmsg);
+    yada->destroy(yada);
+    return(1);
+  }
+
+  /* fetch rows one at a time */
+  while(yada->fetch(yada, res, brc))
+    printf("intcol: %d\n", intcol);
+
+  /* check for error */
+  if(yada->error) {
+    errmsg("error fetching row: %s", yada->errmsg);
+    yada->destroy(yada);
+    return(1);
+  }
+
+  /* disconnect and free everything */
+  yada->destroy(yada);
+  return(0);
+</pre>
+
+<div class="node">
+<p><hr>
+<a name="Index"></a>
+Previous:&nbsp;<a rel="previous" accesskey="p" href="#Examples">Examples</a>,
+Up:&nbsp;<a rel="up" accesskey="u" href="#Top">Top</a>
+
+</div>
+
+<h2 class="chapter">6 Index</h2>
+
+<ul class="index-cp" compact>
+<li><a href="#index-bind-15"><code>bind</code></a>: <a href="#Result-retrieval">Result retrieval</a></li>
+<li><a href="#index-commit-18"><code>commit</code></a>: <a href="#trx">trx</a></li>
+<li><a href="#index-connect-2"><code>connect</code></a>: <a href="#yada_005finit">yada_init</a></li>
+<li><a href="#index-destroy-4"><code>destroy</code></a>: <a href="#disconnect">disconnect</a></li>
+<li><a href="#index-disconnect-3"><code>disconnect</code></a>: <a href="#connect">connect</a></li>
+<li><a href="#index-dumpexec-14"><code>dumpexec</code></a>: <a href="#query">query</a></li>
+<li><a href="#index-errmsg-21"><code>errmsg</code></a>: <a href="#error">error</a></li>
+<li><a href="#index-error-20"><code>error</code></a>: <a href="#Variables">Variables</a></li>
+<li><a href="#index-execute-12"><code>execute</code></a>: <a href="#Statement-execution">Statement execution</a></li>
+<li><a href="#index-fetch-16"><code>fetch</code></a>: <a href="#bind">bind</a></li>
+<li><a href="#index-free-5"><code>free</code></a>: <a href="#destroy">destroy</a></li>
+<li><a href="#index-freeall-6"><code>freeall</code></a>: <a href="#free">free</a></li>
+<li><a href="#index-prepare-7"><code>prepare</code></a>: <a href="#Statement-preparation">Statement preparation</a></li>
+<li><a href="#index-preparef-8"><code>preparef</code></a>: <a href="#prepare">prepare</a></li>
+<li><a href="#index-query-13"><code>query</code></a>: <a href="#execute">execute</a></li>
+<li><a href="#index-rollback-19"><code>rollback</code></a>: <a href="#commit">commit</a></li>
+<li><a href="#index-trx-17"><code>trx</code></a>: <a href="#Transactions">Transactions</a></li>
+<li><a href="#index-xprepare-11"><code>xprepare</code></a>: <a href="#ypreparef">ypreparef</a></li>
+<li><a href="#index-YADA_005fBINDSET-24"><code>YADA_BINDSET</code></a>: <a href="#Resource-types">Resource types</a></li>
+<li><a href="#index-yada_005finit-1"><code>yada_init</code></a>: <a href="#Control-functions">Control functions</a></li>
+<li><a href="#index-YADA_005fRESULT-23"><code>YADA_RESULT</code></a>: <a href="#Resource-types">Resource types</a></li>
+<li><a href="#index-YADA_005fSTATEMENT-22"><code>YADA_STATEMENT</code></a>: <a href="#Resource-types">Resource types</a></li>
+<li><a href="#index-yprepare-9"><code>yprepare</code></a>: <a href="#preparef">preparef</a></li>
+<li><a href="#index-ypreparef-10"><code>ypreparef</code></a>: <a href="#yprepare">yprepare</a></li>
+   </ul></body></html>
+

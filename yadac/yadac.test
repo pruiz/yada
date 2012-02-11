@@ -1,0 +1,159 @@
+
+/******************************************************************************
+ ******************************************************************************/
+
+/** \file FILE.yada.c
+ *  automatically generated from: FILE.yada
+ */
+
+/******************************************************************************
+ * I N C L U D E S ************************************************************
+ ******************************************************************************/
+
+#include <stdlib.h>
+
+#include <yada.h>
+
+/******************************************************************************
+ * T Y P E D E F S ************************************************************
+ ******************************************************************************/
+
+/******************************************************************************
+ * G L O B A L S **************************************************************
+ ******************************************************************************/
+
+/* database connection */
+static yada_t *db;
+
+/* prepared statements */
+static yada_rc_t *stmt_NAME;
+
+/* error conditions */
+int CLASS_error;
+
+/******************************************************************************
+ * S Q L **********************************************************************
+ ******************************************************************************/
+
+/* NAME query */
+#define SQL_NAME \
+  "select min(adddate(end_d, interval -6 day)), max(end_d) "\
+  "from timesheet "\
+  "where id in ("\
+    "select ts_id "\
+    "from invoice_link "\
+    "where inv_id=?d"\
+  ")"
+
+/******************************************************************************
+ * F U N C T I O N S **********************************************************
+ ******************************************************************************/
+
+/******************************************************************************/
+/** NAME function
+ * @return 0 on success (STATUS type)
+ */
+
+int CLASS_NAME(yada_t *db, PARAMS)
+{
+  /* execute statement */
+  if(db->execute(db, stmt_NAME, ARGS) == -1)
+    {
+    errmsg(LOG_ERR, "query failed: %s", db->errmsg);
+    return(-1);
+    }
+
+  return(0);
+}
+
+/******************************************************************************/
+/** NAME SIMPLE function
+ * @return selected TYPE on success
+ */
+
+TYPE CLASS_NAME(yada_t *db, PARAMS)
+{
+  yada_rc_t *query, *bs;
+  TYPE VAR;
+
+
+  /* prepare bindset */
+  if(!(bs = db->bind(db, "?PARAM", VAR)))
+    {
+    syslog(LOG_WARNING, "error accessing INAT (getauth): %s", inat->errmsg);
+    return(-1);
+    }
+
+  /* execute query */
+  if(!(query = db->query(db, stmt_NAME, ARGS)))
+    {
+    errmsg(LOG_ERR, "query failed: %s", db->errmsg);
+    return(-1);
+    }
+
+  /* fetch result */
+  if(!db->fetch(db, query, bs))
+    {
+    errmsg(LOG_ERR, "fetch failed: %s", db->errmsg);
+    return(-1);
+    }
+  db->free(db, query);
+
+  return(VAR);
+}
+
+/******************************************************************************/
+/** NAME SINGLE function
+ * @return 0 on success
+ */
+
+int CLASS_NAME(yada_t *db, PARAMS)
+{
+  yada_rc_t *query, *bs;
+
+
+  /* prepare bindset */
+  if(!(bs = db->bind(db, "?PARAMS", PARAMS)))
+    {
+    syslog(LOG_WARNING, "error accessing INAT (getauth): %s", inat->errmsg);
+    return(-1);
+    }
+
+  /* execute query */
+  if(!(query = db->query(db, stmt_NAME, ARGS)))
+    {
+    errmsg(LOG_ERR, "query failed: %s", db->errmsg);
+    return(-1);
+    }
+
+  /* fetch result */
+  if(!db->fetch(db, query, bs))
+    {
+    errmsg(LOG_ERR, "fetch failed: %s", db->errmsg);
+    return(-1);
+    }
+  db->free(db, query);
+
+  return(0);
+}
+
+/******************************************************************************/
+/** init function
+ * @return 0 on success
+ */
+
+int CLASS_init()
+{
+}
+
+/******************************************************************************/
+/** cleanup function
+ */
+
+void CLASS_cleanup()
+{
+}
+
+/******************************************************************************
+ ******************************************************************************/
+

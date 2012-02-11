@@ -1,0 +1,195 @@
+2007-11-20 Matt Griswold <matt@devit.com>
+	* Version 1.0.0
+
+2007-11-20 Matt Griswold <matt@devit.com>
+	* fix minor build issues
+	* libltdl is only built if there isn't a system one
+	* remove old init.mk system
+	* fix yadac build to not need yada installed
+	* fix yadac disabling
+	* add ebuild
+
+2007-10-16 Matt Griswold <matt@devit.com>
+	* fix stack overflow in bind
+
+2007-09-28 Matt Griswold <matt@devit.com>
+	* add va_list functions
+
+2007-09-13 Matt Griswold <matt@devit.com>
+	* Version 0.10.2
+
+2007-07-19 Sven Lichty <sven@devIT.com>
+	* fix yadac to allow binding to structure members like: a->b.c
+
+2007-07-09 Matt Griswold <matt@devit.com>
+	* Version 0.10.1
+	* add version option to yadac
+
+2007-07-05 Matt Griswold <matt@devit.com>
+	* add float support to yadac
+
+2007-06-28 Matt Griswold <matt@devit.com>
+	* Version 0.10.0
+	* clean up test, fix yadac Makefile
+
+2007-06-27 Matt Griswold <matt@devit.com>
+	* yada_oracle.c: add float support
+	* reorg tests
+
+2007-06-13 Matt Griswold <matt@devit.com>
+	* yada_oracle.c: fix err struct
+	* xexecute properly returns -1 on error
+
+2007-05-20 Matt Griswold <matt@devit.com>
+	* fix and separate tests for native prepares
+	* add YADA_PREPARED for natively prepared statements
+	* restruture prepare to allow native prepare
+	* add execprep and queryprep to private struct
+	* merge in patch from Stuart Walsh <stu@ipng.org.uk> for native prepares in pgsql
+	* changed YADA_ECONNLOST to YADA_ENOTCONN
+
+2007-05-14 Matt Griswold <matt@devit.com>
+	* fixed module private memory leak
+	* fixed possible double free on failed oracle module init
+	* merge connection lost patch from Stuart Walsh <stu@ipng.org.uk>
+	* merge patches from Stuart Walsh <stu@ipng.org.uk>: connection lost, pg insert id
+
+2007-05-10 Matt Griswold <matt@devit.com>
+	* Makefile.in: add datarootdir for autoconf > 2.60
+	* acinclude.m4: add debian postgresql dir
+	* acinclude.m4: add ORACLE_HOME/include for instantclient
+
+2007-05-08 Matt Griswold <matt@devit.com>
+	* contrib/yada.spec: remove unneeded patch, fix source version
+
+2007-05-07 Matt Griswold <matt@devit.com>
+	* fix escape string dest len off by one bugs in common and sqlite3
+	* merge in error handling patches from Mike Pomraning <mike.pomraning@tdstelecom.com>
+	* yada_init now takes const char * as first argument
+	* rewrite yada_init to allow for better error handling
+
+2007-05-04 Matt Griswold <matt@devit.com>
+	* fix bug with negative numbers in prepare
+
+2007-05-04 Matt Griswold <matt@devit.com>
+	* use man3dir variable in Makefile
+
+2007-05-04 Mike Pomraning <mike.pomraning@tdstelecom.com>
+	* add spec file
+
+2007-03-15 Sven Lichty <sven@devIT.com>
+	* fixed statement handle (cursor) leak in Oracle module
+
+2007-01-08 Sven Lichty <sven@devIT.com>
+	* does not install libltdl.so when using bundled libltdl
+	* no longer requires yacc/lex to build yadac from package
+
+2006-08-18 Matt Griswold <matt@devit.com>
+	* man pages install to correct directory
+
+2006-08-07 Matt Griswold <matt@devit.com>
+	* Version 0.9.3
+
+2006-08-07 Matt Griswold <matt@devIT.com>
+	* yadac: added support for binding structs to input vars
+
+2006-07-31 Sven Lichty <sven@devIT.com>
+	* yadac: CVAR's now accept '.' and '->' in scanner
+
+2006-07-25 Matt Griswold <matt@devit.com>
+	* fixed escape " and don't escape % change
+
+2006-07-15 Matt Griswold <matt@devit.com>
+	* add insert_id function to all modules
+
+2006-06-11 Matt Griswold <matt@devit.com>
+	* import yada compiler
+	* fix build system to make installation dirs
+	* upgrade included libltdl to version 1.5.22
+	* upgrade ltmain.sh to version 1.5.22
+	* fix dist to have generated lex/yacc files
+	* fix yadac make to work with older gcc
+
+2006-03-02 Matt Griswold <matt@devit.com>
+	* Version 0.9.1
+	* fix invalid free in xexecute
+	* fix error returns in execute and xexecute
+	* add tests for xexecute
+	* add version info to header
+
+2006-02-27 Matt Griswold <matt@devit.com>
+	* escape " and don't escape %
+
+2005-09-15 Sven Lichty <sven@devIT.com>
+	* fetch from oracle database no longer errors on warnings
+	* cleanup Makefiles
+
+2005-09-12 Matt Griswold <matt@devit.com>
+	* add 64 bit int support
+
+2005-05-07 Matt Griswold <matt@devit.com>
+	* Version 0.9.0
+
+2005-05-06 Matt Griswold <matt@devit.com>
+	* add texinfo docs
+	* redo docs build system
+
+2005-05-19 Matt Griswold <matt@devit.com>
+	* add ypreparef function
+
+2005-05-19 Matt Griswold <matt@devit.com>
+	* standardized new mod_init function
+	* code clean up
+
+2005-05-17 Matt Griswold <matt@devit.com>
+	* oracle: fixed transactions - made autocommit by default
+
+2005-05-16 Matt Griswold <matt@devit.com>
+	* main yada struct redone to stop future additions from breaking binary compat
+
+2005-04-27 Matt Griswold <matt@devit.com>
+	* enhance tests
+	* errmsg is a pointer to internal errbuf for future compatability
+
+2005-04-26 Matt Griswold <matt@devit.com>
+	* yada.errmsg is now a static string on the struct, macros copy to it
+	* oracle: remove errbuf and switch to use the new yada errmsg
+	* standardized transaction functions
+	* mysql: fix transaction function returns
+	* pgsql: fix transaction function returns
+	* sqlite3: fix transaction function returns
+	* oracle: fix commit function returns
+	* test: check all transaction function returns
+	* bugfixes
+	* sqlite3: brought up to date with sqlite3 API changes
+	* sqlite3: typecast to remove warnings
+	* mysql: only tries reconnect on network errors,
+	         if successful immediatly retries query
+
+2005-04-25 Matt Griswold <matt@devit.com>
+	* prepexec.c: made return length optional in parse_exec
+
+2005-04-10 Matt Griswold <matt@devit.com>
+	* Version 0.8.0
+
+2005-04-10 Matt Griswold <matt@devit.com>
+	* import pgsql module from Daniel O'Neill
+	* add pgsql to build system
+	* pgsql: set notice handler to stop libpq from printing to stderr
+	* pgsql: use native string escaper
+	* pgsql: handles nulls for bound pointers
+	* pgsql: connect uses same format as mysql connect
+	* pgsql: connect doesn't write to dbstr
+
+2005-03-16 Sven Lichty <sven@devit.com>
+	* Oracle and MySQL modules transparently try to reconnect
+	* acinclude.m4: fixed --with-oracle
+	* yada.c: fixed memory leak when dlopen fails
+
+2005-02-03 Matt Griswold <matt@devit.com>
+	* Makefile.in: fixed to use autoconf's chosen install program
+	* yada.trx.3: corrected rollback prototype
+
+2005-01-31 Matt Griswold <matt@devit.com>
+	* Version 0.7.0
+

@@ -1,0 +1,152 @@
+
+################################################################################
+################################################################################
+
+# Makefile
+# yada compiler build system
+#
+# $Id: Makefile.in 190 2007-11-21 00:07:23Z grizz $
+
+################################################################################
+## compiler
+
+CC              = @CC@
+CPPFLAGS        = @DEFS@
+CFLAGS          = @CFLAGS@ $(INCLUDES)
+LDFLAGS         = @LDFLAGS@
+INCLUDES        = -I$(top_srcdir) -I$(top_srcdir)/src -I$(srcdir) $(LTDLINCL)
+LIBS            = @LIBS@
+
+CCLD            = $(CC)
+LIBTOOL         = @LIBTOOL@
+LINK            = $(LIBTOOL) --mode=link $(CCLD) -version-info @LIB_VERSION@ $(CFLAGS) $(LDFLAGS) -o $@
+LTCOMPILE       = $(LIBTOOL) --mode=compile $(CC) $(CFLAGS) $(CPPFLAGS)
+LTDLINCL	= @LTDLINCL@
+LIBLTDL		= @LIBLTDL@
+
+################################################################################
+## utils
+
+CP              = cp
+LN_S            = @LN_S@
+MKDIR_P         = @MKDIR_P@
+INSTALL         = @INSTALL@
+INSTALL_STRIP   = @INSTALL@ @STRIP_OPT@
+RM              = rm -f
+SHELL           = @SHELL@
+YACC            = @YACC@
+LEX             = @LEX@
+IGNORE          = touch
+@SET_MAKE@
+
+################################################################################
+## build dirs
+VPATH           = @srcdir@
+srcdir          = @srcdir@
+top_srcdir      = @top_srcdir@
+top_builddir    = @top_builddir@
+
+################################################################################
+## install dirs
+
+DESTDIR		=
+prefix          = @prefix@
+exec_prefix	= @exec_prefix@
+sysconfdir	= @sysconfdir@
+bindir		= @bindir@
+sbindir		= @sbindir@
+libdir		= @libdir@
+libexecdir	= @libexecdir@
+datadir		= @datadir@
+datarootdir	= @datarootdir@
+mandir		= @mandir@
+includedir	= @includedir@
+
+################################################################################
+## install
+
+iuser           = nobody
+igroup          = nogroup
+iexec           = 755
+idata           = 644
+
+################################################################################
+## compile options
+
+ALL_CPPFLAGS = -DPACKAGE_VERSION=\"$(PACKAGE_VERSION)\" @DEFS@
+
+################################################################################
+## files
+
+# stuff with no dependencies
+nodeps = yadac.lex yadac.y yadac.c test.yada
+
+# generated sources
+allsrc = yadac.y.c yadac.y.h yadac.lex.c yadac.lex.h
+
+allobj = yadac.o yadac.y.o yadac.lex.o
+allbin = yadac
+
+################################################################################
+## make
+
+.PHONY : all
+all : $(modules)
+	@echo $(allbin) | xargs $(MAKE)
+	@echo done.
+
+.PHONY : source
+source :
+	@echo $(allsrc) | xargs $(MAKE)
+
+.PHONY : clean
+clean :
+	@-$(RM) $(allbin) $(allobj)
+	@-$(RM) test.o test.yada.*
+
+.PHONY : distclean
+distclean : clean
+	-$(RM) Makefile
+
+.PHONY : maintainer-clean
+maintainer-clean : distclean
+	-$(RM) $(allsrc)
+
+.PHONY : install
+install :
+	test -z "$(DESTDIR)$(bindir)" || \
+	 $(INSTALL) -d -- "$(DESTDIR)$(bindir)"
+	$(INSTALL_STRIP) -m $(iexec) yadac $(DESTDIR)$(bindir)
+	@echo 'no install'
+
+################################################################################
+## tests
+
+.PHONY : test
+test : test.yada.o test.o
+	$(CC) $(LDFLAGS) -o $@ $^ -lyada
+
+test.yada.c : test.yada yadac
+	./yadac test.yada
+
+################################################################################
+## compile
+
+$(nodeps) :
+	$(IGNORE) $@
+
+yadac.y.c : yadac.y yadac.lex.c
+	$(YACC) -do$@ $<
+
+yadac.lex.c : yadac.lex
+	$(LEX) --header-file=yadac.lex.h -o$@ $<
+
+yadac : $(allobj)
+	$(CC) $(LDFLAGS) -o $@ $^
+
+%.o : %.c
+	$(CC) $(CFLAGS) $(CPPFLAGS) -o $@ -c $<
+
+################################################################################
+################################################################################
+
