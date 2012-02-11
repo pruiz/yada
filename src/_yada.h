@@ -58,7 +58,7 @@
 /** debug macros
  */
 
-//#ifdef DEBUG
+#ifdef DEBUGMODE
 #  define DEBUGMSG(m...) { fprintf(stdout, m); fprintf(stdout, "\n"); }
 #  ifdef DEBUGCOLOR
 #    define DBG_RED(a) "\033[01;31m" a "\033[00m"
@@ -75,9 +75,9 @@
 #    define DBG_MAGENTA(a) a
 #    define DBG_CYAN(a) a
 #  endif
-//#else
-//#  define DEBUGMSG(...)
-//#endif
+#else
+#  define DEBUGMSG(...)
+#endif
 
 /******************************************************************************/
 /** macro to set arbitrary error info to the yada struct
